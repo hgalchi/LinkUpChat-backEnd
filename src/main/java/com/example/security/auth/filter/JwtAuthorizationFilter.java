@@ -1,8 +1,6 @@
 package com.example.security.auth.filter;
 
-import com.example.security.repository.UserRepository;
-import com.example.security.utils.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.security.common.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,28 +1,26 @@
-package com.example.security.utils;
+package com.example.security.common.utils;
 
+import com.example.security.auth.entity.constant.TokenType;
+import com.example.security.common.codes.ResponseCode;
+import com.example.security.common.exception.BusinessException;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
 
-//todo : 외부설정 파일에서 정보 가져오기
-    @Value("${refresh.expriation-time}")
+    @Value("${jwt.refresh.expiration-time}")
     private String refreshExpirationTime;
 
-    @Value("${access.expriation-time}")
+    @Value("${jwt.access.expiration-time}")
     private String accessExpirationTime;
 
     @Value("${jwt.secret-key}")
@@ -42,16 +40,17 @@ public class JwtUtil {
      * 토큰 생성
      * @param email 사용자 이메일
      * @param roles 사용자 권한
-     * @param catetory  accesstoken,refreshtoken을 구분하기 위한 문자열
+     * @param category  accesstoken,refreshtoken을 구분하기 위한 문자열
      * @return 생성된 JWT토큰
      */
-    public String creteToken(String email,List<String> roles,String catetory) {
+    public String createToken(String email, List<String> roles, String category) {
 
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
-        claims.put("catetory", catetory);
+        claims.put("category", category);
 
-        Long token=(Objects.equals(catetory, "accessToken") ? Long.parseLong(accessExpirationTime) : Long.parseLong(refreshExpirationTime));
+        Long token = (Objects.equals(category, TokenType.accessToken.name()) ? Long.parseLong(accessExpirationTime) : Long.parseLong(refreshExpirationTime));
+        //new Date(System.currentTimeMillis()+accessEcpiration
         Date tokenValidity = new Date(new Date().getTime() + TimeUnit.MINUTES.toMillis(token));
 
         return Jwts.builder()
@@ -80,6 +79,17 @@ public class JwtUtil {
     }
 
     /**
+     * token을 cliams로 변환
+     * @param token
+     * @return
+     */
+    public Claims tokenReverseClaims(String token) throws Exception {
+        Claims claims = validateToken(token);
+        if(validateClaims(claims)) return claims;
+        return null;
+    }
+
+    /**
      * JWT 토큰의 유효성 검증
      * @throws  SignatureException,MalformedJwtException,ExpiredJwtException 토큰이 유효하지 않을 때 발생
      * @param token
@@ -95,6 +105,16 @@ public class JwtUtil {
         }
     }
 
+
+
+    /**
+     * Claims의 만료 기간 검증
+     * @return 만료기간이 유효하면 true, 그렇지 않으면 false
+     */
+    public boolean validateClaims(Claims claims) {
+        return claims.getExpiration().after(new Date());
+    }
+
     /**
      * Http 요청쿠키에서 refresh 토큰 추출
      */
@@ -102,8 +122,11 @@ public class JwtUtil {
         //get refresh token
         String refresh = null;
         Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            throw new BusinessException(ResponseCode.TOKEN_NOT_EXIST);
+        }
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
+            if (cookie.getName().equals(TokenType.refreshToken.name())) {
                 refresh = cookie.getValue();
             }
         }
@@ -120,13 +143,7 @@ public class JwtUtil {
         }return null;
     }
 
-    /**
-     * Claims의 만료 기간 검증
-     * @return 만료기간이 유효하면 true, 그렇지 않으면 false
-     */
-    public boolean validateClaims(Claims claims) {
-            return claims.getExpiration().after(new Date());
-    }
+
 
     public String getEmail(Claims claims) {
         return claims.getSubject();
@@ -137,7 +154,7 @@ public class JwtUtil {
     }
 
     public String getCategory(Claims claims) {
-        return claims.get("catetory").toString();
+        return claims.get("category").toString();
     }
 
 

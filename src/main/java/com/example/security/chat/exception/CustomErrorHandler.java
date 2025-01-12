@@ -1,7 +1,6 @@
 package com.example.security.chat.exception;
 
-import com.example.security.codes.ErrorCode;
-import com.example.security.codes.ErrorResponse;
+import com.example.security.common.codes.ResponseCode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -16,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 @Log4j2
 public class CustomErrorHandler extends StompSubProtocolErrorHandler {
 
+
     public CustomErrorHandler() {
         super();
     }
@@ -23,20 +23,27 @@ public class CustomErrorHandler extends StompSubProtocolErrorHandler {
     @Override
     public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
 
+        //MessageDeliverException("UNAUTHORIZED")
+        if (ex.getCause().getMessage().equals("UNAUTHORIZED")) {
+            return errorMessage(ResponseCode.UNAUTHORIZED);
+        }
+        if (ex.getCause().getMessage().equals("INVALID_DESTINATION")) {
+            return errorMessage(ResponseCode.INVALID_DESTINATION);
+        }
         log.info("CustomErrorHandler exception : " + ex);
 
         return super.handleClientMessageProcessingError(clientMessage, ex);
 
     }
 
-    private Message<byte[]> errorMessage(String message) {
+    private Message<byte[]> errorMessage(ResponseCode code) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 
-        accessor.setMessage(ErrorCode.UNAUTHORIZED.toString());
+        String message = String.valueOf(code.getMessage());
+        accessor.setMessage(String.valueOf(code.getStatus()));
         accessor.setLeaveMutable(true);
 
-        return MessageBuilder.createMessage(message.toString().getBytes(StandardCharsets.UTF_8)
-                , accessor.getMessageHeaders());
+        return MessageBuilder.createMessage(message.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders());
     }
 
 }

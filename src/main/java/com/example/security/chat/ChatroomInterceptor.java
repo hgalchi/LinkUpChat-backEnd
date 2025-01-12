@@ -1,11 +1,13 @@
 package com.example.security.chat;
 
 import com.example.security.chat.service.SocketService;
-import com.example.security.utils.JwtUtil;
+import com.example.security.user.repository.UserRepository;
+import com.example.security.common.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.core.config.Order;
+import org.springframework.core.Ordered;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -13,6 +15,10 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
@@ -26,42 +32,59 @@ import java.util.Optional;
 @Component
 @Log4j2
 @RequiredArgsConstructor
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class ChatroomInterceptor implements ChannelInterceptor {
 
     private final JwtUtil jwtUtil;
     private final SocketService socketService;
+    private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+            printStompFrame(message,accessor);
+
         /*
          *CONNECT할 경우 유저의 accessToken을 사용해 인증 여부를 확인 후
          * STOMP HEADER에 식별가능한 값 email을 추가
          */
         if (accessor.getCommand().equals(StompCommand.CONNECT)) {
-            String authorizationHeader = String.valueOf(accessor.getNativeHeader("Authorization").get(0));
             //token 인증
-            String email =validateToken(authorizationHeader);
-            //헤더에 user email 추가
-            Map<String,Object> sessionAttributes = accessor.getSessionAttributes();
-            sessionAttributes.put("email",email);
-            accessor.setSessionAttributes(sessionAttributes);
+            String email =validateToken(accessor);
+
+            //header에 정보추가
+            //동일한 세션으로 전송된 메세지 헤더에는 socketContext에서 관리된다.
+            //1. simpUser
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            UsernamePasswordAuthenticationToken authentication=
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            accessor.setUser(authentication);
+            accessor.getUser().getName();
+
+            //2. simpSessionAttributes
+            Map<String,Object> sessionAttributes= accessor.getSessionAttributes();
+            String username = userRepository.findByEmail(email).get().getName();
+            assert sessionAttributes != null;
+            sessionAttributes.put("name", username);
         /*
          * SUBCRIBE할 경우 구독 경로를 검사한 후
          * 채팅방에 유저 추가
          */
         }else if(accessor.getCommand().equals(StompCommand.SUBSCRIBE)){
-            //destination 경로 검사 "/app/chat/room/**","/topic/room/**"이외의 경로 구독은 거절
+            //destination 경로 검사 "/app/chat/room/**","/user/queue**"이외의 경로 구독은 거절
             String destination = accessor.getDestination();
-            if (destination == null ||!destination.startsWith("/topic/room/")) {
-                throw new MessageDeliveryException("Invalid destination");
+            if (destination == null || (!destination.startsWith("/topic/room/") && !destination.startsWith("/user/queue/"))) {
+                throw new MessageDeliveryException("invalid destination");
             }
             //방인원 검사
-            String email=Optional.of((String) accessor.getSessionAttributes().get("email"))
-                    .orElseThrow(()->new MessageDeliveryException("Invalid email"));
-            Long roomId = Long.parseLong(destination.split("/")[3]) ;
-            socketService.join(email,roomId);
+            if(destination.startsWith("/topic/room/")){
+                String email=Optional.of(accessor.getUser().getName())
+                        .orElseThrow(()->new MessageDeliveryException("Invalid email"));
+                Long roomId = Long.parseLong(destination.split("/")[3]) ;
+                socketService.join(email,roomId);
+            }
         /*
          * 클라이언트의 MESSAGE는 모두 거절
          */
@@ -69,43 +92,51 @@ public class ChatroomInterceptor implements ChannelInterceptor {
             throw new MessageDeliveryException("Invalid command");
         }
 
-        printStompFrame(message,accessor);
 
         return message;
     }
     /**
      * 토큰 인증
      * 만료나 변조 시, 예외를 터트린다.
+     * return 토큰 인증 성공 시 사용자의 이메일을 반환한다.
      */
-    private String validateToken(String authorizationHeader) {
-        String token = resolveToken(authorizationHeader).trim();
-        if (token == null) {
-            throw new MessageDeliveryException("accessToken is null");
-        }
-        Claims claims = jwtUtil.validateToken(token);
-        if(!jwtUtil.validateClaims(claims)) throw new MessageDeliveryException("token expried");
+    //todo : jwtUtil에서 exceptio처리 정리하기
+    private String  validateToken(StompHeaderAccessor accessor) {
 
-        return jwtUtil.getEmail(claims);
+        String authorizationHeader = String.valueOf(accessor.getNativeHeader("Authorization").get(0));
+
+        String token = resolveAuthorizationHeader(authorizationHeader).trim();
+        try {
+            Claims claims = Optional.ofNullable(jwtUtil.tokenReverseClaims(token))
+                    .orElseThrow(() -> new MessageDeliveryException("to 유효기간이 만료되었습니다."));
+            return jwtUtil.getEmail(claims);
+        }catch (Exception e){
+            throw new MessageDeliveryException("token이나 cliams의 유효기간 만료");
+        }
     }
 
-    private String resolveToken(String authorizationHeader) {
-        if(authorizationHeader == null || authorizationHeader.equals("null")) {
-            throw new MessageDeliveryException("Authorization header is missing");
-        }
-        return authorizationHeader.substring("Bearer".length());
+    private String resolveAuthorizationHeader(String authorizationHeader) {
+        String token = Optional.ofNullable(jwtUtil.resolveToken(authorizationHeader))
+                .orElseThrow(() -> new MessageDeliveryException("Authorization header is miassing"));
+        return token;
+
+
     }
 
     /**
      * 요청 Frame출력
      */
     private void printStompFrame(Message<?> message,StompHeaderAccessor accessor) {
-        System.out.println("Command: " + accessor.getCommand());
+        log.info("==================================================");
+        log.info("Command: " + accessor.getCommand());
         MessageHeaders headers = message.getHeaders();
         MultiValueMap<String, String> multiValueMap = headers.get(StompHeaderAccessor.NATIVE_HEADERS, MultiValueMap.class);
         if (multiValueMap != null) {
             for (Map.Entry<String, List<String>> head : multiValueMap.entrySet()) {
-                System.out.println(head.getKey() + "#" + head.getValue());
+                log.info(head.getKey() + "#" + head.getValue());
             }
         }
+        log.info("==================================================");
+
     }
 }

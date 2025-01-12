@@ -19,6 +19,8 @@ public class Chatroom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long owner;
+
     @Column(length = 10)
     private String name;
 
@@ -27,10 +29,13 @@ public class Chatroom {
     private int maxCount;
 
     @OneToMany(mappedBy = "chatRoom",fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Chatmessage> chatMessage = new ArrayList<>();
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<UserChatroom> Users = new HashSet<>();
+
 
     public void addDetail(UserChatroom userChatroom) {
         Users.add(userChatroom);

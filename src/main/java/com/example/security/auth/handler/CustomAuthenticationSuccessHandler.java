@@ -1,17 +1,21 @@
 package com.example.security.auth.handler;
 
 import com.example.security.auth.entity.Refresh;
-import com.example.security.Entity.User;
-import com.example.security.repository.RefreshRepository;
-import com.example.security.repository.UserRepository;
-import com.example.security.utils.CookieUtil;
-import com.example.security.utils.JwtUtil;
+import com.example.security.auth.entity.constant.TokenType;
+import com.example.security.auth.service.AuthService;
+import com.example.security.user.entity.User;
+import com.example.security.user.repository.RefreshRepository;
+import com.example.security.user.repository.UserRepository;
+import com.example.security.common.utils.CookieUtil;
+import com.example.security.common.utils.JwtUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.antlr.v4.runtime.Token;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -28,10 +33,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final AuthService authService;
     private final CookieUtil cookieUtil;
-    private final UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -44,7 +47,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     }
 
     /**
-     * RefreshToken과 AccessToken을 생성해 응답 객체의 헤더와 쿠키에 전달
+     * RefreshToken과 AccessToken을 header와 cookie값으로 전송
      * @param response
      * @param authentication
      * @throws IllegalAccessException
@@ -52,27 +55,16 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     protected void handle(HttpServletResponse response, Authentication authentication) throws IllegalAccessException {
 
         String email = authentication.getName();
-        User user = userRepository.findByEmail(email).get();
         List<String> authorities =  authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        String accessToken = jwtUtil.creteToken(email,authorities, "accessToken");
-        String refreshToken = jwtUtil.creteToken(email,authorities, "refreshToken");
-
-        //AccessToken 재발행을 위해 서버에 저장
-        String expiration = jwtUtil.refreshExpireTime();
-        Refresh refresh = Refresh.builder()
-                .expiration(expiration)
-                .refresh(refreshToken)
-                .user(user)
-                .build();
-        refreshRepository.save(refresh);
+        Map<String, String> token = authService.issueToken(email, authorities);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.addHeader("Authorization", "Bearer " + accessToken);
-        response.addCookie(cookieUtil.createCookie("refresh", refreshToken));
+        response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.get(TokenType.accessToken.name()));
+        response.addCookie(cookieUtil.createCookie(TokenType.refreshToken.name(), token.get(TokenType.refreshToken.name())));
     }
 
     protected void clearAuthenticationAttributes(HttpServletRequest request) {

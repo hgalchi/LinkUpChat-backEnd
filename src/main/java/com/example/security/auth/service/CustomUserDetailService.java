@@ -1,8 +1,8 @@
 package com.example.security.auth.service;
 
 import com.example.security.auth.entity.Group;
-import com.example.security.Entity.User;
-import com.example.security.repository.UserRepository;
+import com.example.security.user.entity.User;
+import com.example.security.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,7 +47,7 @@ public class CustomUserDetailService implements UserDetailsService {
      * @return Collection<GrantedAuthority> 사용자 권한 리스트
      */
     private Collection<GrantedAuthority> getAuthorities(User user) {
-        Set<Group> userGroups = user.getUserGroups();
+        Set<Group> userGroups = user.getRoles();
         Collection<GrantedAuthority> authorities = new ArrayList<>(userGroups.size());
         for (Group group : userGroups) {
             authorities.add(new SimpleGrantedAuthority(group.getCode().toUpperCase()));
