@@ -1,4 +1,4 @@
-package com.example.security.utils;
+package com.example.security.common.utils;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.stereotype.Component;
