@@ -1,0 +1,50 @@
+package LinkUpTalk.common.exception;
+
+import LinkUpTalk.common.response.ResponseCode;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
+
+import java.nio.charset.StandardCharsets;
+
+@Component
+@Log4j2
+public class CustomErrorHandler extends StompSubProtocolErrorHandler {
+
+
+    //todo : http요청과 stomp 요청의 결합
+    public CustomErrorHandler() {
+        super();
+    }
+
+    @Override
+    public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
+
+        //MessageDeliverException("UNAUTHORIZED")
+        if (ex.getCause().getMessage().equals("UNAUTHORIZED")) {
+            return errorMessage(ResponseCode.UNAUTHORIZED);
+        }
+        if (ex.getCause().getMessage().equals("INVALID_DESTINATION")) {
+            return errorMessage(ResponseCode.INVALID_DESTINATION);
+        }
+        log.info("CustomErrorHandler exception : " + ex);
+
+        return super.handleClientMessageProcessingError(clientMessage, ex);
+
+    }
+
+    private Message<byte[]> errorMessage(ResponseCode code) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+
+        String message = String.valueOf(code.getMessage());
+        accessor.setMessage(String.valueOf(code.getStatus()));
+        accessor.setLeaveMutable(true);
+
+        return MessageBuilder.createMessage(message.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders());
+    }
+
+}
