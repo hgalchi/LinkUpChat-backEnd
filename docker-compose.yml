@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  postgres:
+    container_name: postgres-total
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=chatting-total
+      - POSTGRES_USER=chatUser
+      - POSTGRES_PASSWORD=1234
+      - TZ=Asia/Seoul
+    volumes:
+      - "./init/:/docker-entrypoint-initdb.d"
