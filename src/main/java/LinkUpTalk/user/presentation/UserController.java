@@ -17,6 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
+    //todo : 커스텀 어노테이션으로 변경
     /**
      * 사용자 단건 조회 : 코드 키 값을 기반으로 조회
      */
@@ -29,7 +30,7 @@ public class UserController {
     /**
      * 사용자 수정
      */
-    @PreAuthorize("hasRole('ADMIN') or @resourceAuthService.isUserOwner(authentication, #userId)")
+    @PreAuthorize("hasRole('ADMIN') or @userResourceAuthService.isResourceOwner(authentication, #userId)")
     @PostMapping("/profile/{userId}")
     public ResponseEntity<ResponseCode> modify(@PathVariable Long userId, @Valid @RequestBody UserModifyReqDto reqDto) {
         userService.modify(userId,reqDto);
@@ -39,7 +40,7 @@ public class UserController {
     /**
      * 사용자 비밀번호 수정
      */
-    @PreAuthorize("hasRole('ADMIN') or @resourceAuthService.isUserOwner(authentication, #userId)")
+    @PreAuthorize("hasRole('ADMIN') or @userResourceAuthService.isResourceOwner(authentication, #userId)")
     @PostMapping("/profile/password/{userId}")
     public ResponseEntity<ResponseCode> modifyPassword(@PathVariable Long userId,@Valid @RequestBody UserPasswordModifyReqDto reqDto) {
         userService.modifyPassword(userId,reqDto);
