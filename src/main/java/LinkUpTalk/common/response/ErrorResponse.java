@@ -1,8 +1,11 @@
 package LinkUpTalk.common.response;
 
+import ch.qos.logback.core.spi.ErrorCodes;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.validation.BindingResult;
 
 import java.util.*;
@@ -10,11 +13,12 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse  {
 
-    private Map<String, Object> header=new HashMap<>();
-    private List<Object> errors;
+    private Integer code;
     private String message;
+    private List<Object> errors;
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,32 +33,29 @@ public class ErrorResponse  {
             this.reason = fieldError.getDefaultMessage();
             return this;
         }
-
     }
 
-    public ErrorResponse (ResponseCode errorCode, BindingResult e) {
-        header.put("status", errorCode.getStatus());
-        header.put("message", errorCode.name());
-        this.errors=e.getFieldErrors().stream()
-                .map(f->new FieldError().of(f))
+    private ErrorResponse(ResponseCode code,BindingResult bindingResult) {
+        this.code = code.getStatus().value();
+        this.message = code.getMessage();
+        this.errors = bindingResult.getFieldErrors().stream()
+                .map(f -> new FieldError().of(f))
                 .collect(Collectors.toList());
-        this.message = errorCode.getMessage();
-
     }
 
-    public ErrorResponse(ResponseCode errorCode, String descrption) {
-        header.put("status", errorCode.getStatus());
-        header.put("message", errorCode.name());
-        this.errors = Arrays.asList(descrption);
-        this.message = errorCode.getMessage();
+    private ErrorResponse(ResponseCode code) {
+        this.code = code.getStatus().value();
+        this.message = code.getMessage();
     }
 
-    public ErrorResponse(ResponseCode errorCode) {
-        header.put("status", errorCode.getStatus());
-        header.put("message", errorCode.name());
-        this.errors = new ArrayList<>();
-        this.message = errorCode.getMessage();
+    public static ErrorResponse of(ResponseCode errorCode, BindingResult bindingResult) {
+        return new ErrorResponse(errorCode, bindingResult);
     }
+
+    public static ErrorResponse of(ResponseCode errorCode) {
+        return new ErrorResponse(errorCode);
+    }
+
 
 }
 

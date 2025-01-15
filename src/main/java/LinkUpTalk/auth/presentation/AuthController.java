@@ -29,9 +29,7 @@ public class AuthController {
     private final CookieUtil cookieUtil;
 
     /**
-     * 사용자 등록 [회원가입]
-     * @param req
-     * @return
+     * 사용자 등록
      */
     @PostMapping("/signUp")
     public ResponseEntity<?> register(@Valid @RequestBody UserCreateReqDto req) {
@@ -65,26 +63,5 @@ public class AuthController {
         return ResponseEntity.ok()
                 .headers(header)
                 .build();
-    }
-
-    /**
-     * 로그인 오류
-     * @param error
-     * @param exceptionMessage
-     * @return
-     */
-    @GetMapping("/login")
-    public String loginError(@RequestParam(value = "error", required = false) String error,
-                             @RequestParam(value = "exceptionMessage", required = false) String exceptionMessage) {
-        return "error: " + error + ", exception: " + exceptionMessage;
-    }
-
-    /**
-     * 접근 권한 오류
-     */
-    @GetMapping("/customError")
-    public String customError() {
-
-        return "404 페이지 접근 권한이 없습니다.";
     }
 }
