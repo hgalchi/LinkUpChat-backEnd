@@ -22,25 +22,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final String TOKEN_HADER = "Authorization";
+    private final String TOKEN_HEADER = "Authorization";
     private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-         //Authorizatin 헤더에 담겨 있는 JWT 토큰의 만료기간과 유효성 검증
         try {
-            String bearerToken =request.getHeader(TOKEN_HADER);
+            String bearerToken =request.getHeader(TOKEN_HEADER);
             String accessToken = jwtUtil.resolveToken(bearerToken);
-            if (accessToken == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
             Claims claims = jwtUtil.validateToken(accessToken);
 
             if (jwtUtil.validateClaims(claims)) {
-                List<String> authorityList = jwtUtil.getRoles(claims);
-                List<SimpleGrantedAuthority> authorities = authorityList.stream()
+                List<SimpleGrantedAuthority> authorities = jwtUtil.getRoles(claims).stream()
                         .map(t -> new SimpleGrantedAuthority(t.toUpperCase()))
                         .collect(Collectors.toList());
                 String email = jwtUtil.getEmail(claims);
@@ -49,8 +43,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.info("show exception : " + e.getMessage().toString());
-            //AuthenticationEntryPoint exception 위임
             request.setAttribute("exception", e);
         }
         filterChain.doFilter(request, response);

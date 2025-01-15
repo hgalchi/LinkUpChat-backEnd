@@ -16,8 +16,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect # Hibernate Dialect 추가
 
 jwt:
+  secret-key: secretary
   access:
     expiration-time: 1800
   refresh:
     expiration-time: 1209600000
-  secret-key: mysecretkey

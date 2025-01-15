@@ -3,11 +3,12 @@ package LinkUpTalk.auth.application;
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.auth.domain.Refresh;
 import LinkUpTalk.user.domain.User;
-import LinkUpTalk.user.infrastructor.RefreshRepository;
+import LinkUpTalk.auth.domain.Repository.RefreshRepository;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.util.JwtUtil;
-import LinkUpTalk.user.infrastructor.UserRepository;
+import LinkUpTalk.user.domain.repository.UserRepository;
+import LinkUpTalk.user.infrastructor.JpaUserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -43,7 +44,7 @@ public class AuthService {
 
         Refresh newRefresh = Refresh.builder()
                 .refresh(token.get(TokenType.refreshToken.name()))
-                .expiration(jwtUtil.refreshExpireTime())
+                .expiration(jwtUtil.getRefreshExpireTime())
                 .build();
 
         refreshRepository.deleteByRefresh(refreshToken);
@@ -61,7 +62,7 @@ public class AuthService {
         Map<String, String> token = createAccessToken(email, authorities);
 
         //AccessToken 재발행을 위해 서버에 저장
-        String expiration = jwtUtil.refreshExpireTime();
+        String expiration = jwtUtil.getRefreshExpireTime();
         Refresh refresh = Refresh.builder()
                 .expiration(expiration)
                 .refresh(token.get(TokenType.refreshToken.name()))

@@ -1,2 +1,2 @@
 insert into role_groups (id,code,name)
-    values (1, 'CUSTOMER_ROLE','CUSTOMER'),(2,'ADMIN_ROLE','ADMIN');
+    values (1, 'ROLE_CUSTOMER','CUSTOMER'),(2,'ROLE_ADMIN','ADMIN');
