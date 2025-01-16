@@ -7,11 +7,10 @@ import LinkUpTalk.chat.domain.ChatRoom;
 import LinkUpTalk.chat.domain.UserChatroom;
 import LinkUpTalk.chat.infrastructor.ChatmessageRepository;
 import LinkUpTalk.chat.infrastructor.ChatroomRepository;
-import LinkUpTalk.chat.infrastructor.UserChatroomRepository;
-import LinkUpTalk.chat.dto.ChatMessageDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageDto;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
-import LinkUpTalk.user.infrastructor.UserRepository;
+import LinkUpTalk.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,12 +23,12 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class SocketService {
+public class ChatService {
 
+    //todo : solid원칙으로 하나의 책임을 지는데 나눠야될 필요성이 있는지 생각해보기
 
     private final ChatroomRepository chatRoomRepository;
     private final UserRepository userRepository;
-    private final UserChatroomRepository userChatroomRepository;
     private final ChatmessageRepository chatMessageRepository;
 
     /**

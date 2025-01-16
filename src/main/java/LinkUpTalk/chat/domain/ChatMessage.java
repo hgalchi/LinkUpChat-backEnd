@@ -1,4 +1,4 @@
-package com.example.security.chat.Entity;
+package LinkUpTalk.chat.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Chatmessage {
+public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class Chatmessage {
     //todo 저장 형식 수정
     private LocalDateTime time;
 
-    @ManyToOne
-    @JoinColumn(name = "CHATROOM_ID")
-    private Chatroom chatRoom;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chatroom_id")
+    private ChatRoom chatRoom;
 }

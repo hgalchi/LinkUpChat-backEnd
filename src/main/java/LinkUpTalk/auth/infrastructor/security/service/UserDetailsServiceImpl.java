@@ -1,4 +1,4 @@
-package LinkUpTalk.auth.application.security;
+package LinkUpTalk.auth.infrastructor.security.service;
 
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
