@@ -1,4 +1,4 @@
-package LinkUpTalk.auth.presentation.handler;
+package LinkUpTalk.auth.infrastructor.security.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

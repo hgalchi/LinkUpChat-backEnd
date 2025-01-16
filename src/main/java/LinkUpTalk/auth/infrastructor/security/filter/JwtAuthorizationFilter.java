@@ -1,4 +1,4 @@
-package LinkUpTalk.auth.presentation.filter;
+package LinkUpTalk.auth.infrastructor.security.filter;
 
 import LinkUpTalk.common.util.JwtUtil;
 import io.jsonwebtoken.Claims;

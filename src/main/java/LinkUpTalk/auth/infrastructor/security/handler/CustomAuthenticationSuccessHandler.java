@@ -1,4 +1,4 @@
-package LinkUpTalk.auth.presentation.handler;
+package LinkUpTalk.auth.infrastructor.security.handler;
 
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.auth.application.AuthService;

@@ -1,6 +1,6 @@
-package LinkUpTalk.auth.config;
+package LinkUpTalk.auth.infrastructor.security.config;
 
-import LinkUpTalk.auth.presentation.filter.JwtAuthorizationFilter;
+import LinkUpTalk.auth.infrastructor.security.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -29,7 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig {
+public class SecurityConfig {
 
     @Qualifier("customAuthenticationEntryPoint")
     private final AuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -45,13 +45,12 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> {
                     auth
-                            .requestMatchers("/register","/login","/reissue").permitAll()
-                            .requestMatchers("/customer").hasRole("CUSTOMER")
+                            .requestMatchers("/signUp","/reissue","/stomp").permitAll()
                             .anyRequest().authenticated();
 
                 })
                 .formLogin(form -> form
-                        .loginPage("/signIn")
+                        .loginPage("/login")
                         .failureHandler(customAuthenticationFailureHandler)
                         .successHandler(customAuthenticationSuccessHandler)
                 )
@@ -60,7 +59,6 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(customAuthenticationEntryPoint))
                 .exceptionHandling(h -> h.accessDeniedHandler(customAccessDeniedHandler));
-
 
         return http.build();
     }
@@ -73,7 +71,6 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
-
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);

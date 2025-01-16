@@ -6,10 +6,13 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.ElementCollection;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,7 +28,7 @@ import java.security.SignatureException;
 
 
 @RestControllerAdvice
-@Log4j2
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
@@ -80,6 +83,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(response);
     }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
         log.error(ex.getMessage());
@@ -92,7 +96,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ErrorResponse handleRuntimeException(RuntimeException ex) {
         log.error(ex.getMessage());
-
         return ErrorResponse.of(ResponseCode.SYSTEM_ERROR);
+    }
+
+    @MessageExceptionHandler(BusinessException.class)
+    public void handleMessageBusinessException(Message<?> message) {
+        log.error("Error occurred : {}", message);
     }
 }
