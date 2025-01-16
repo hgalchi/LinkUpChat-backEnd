@@ -1,4 +1,4 @@
-package LinkUpTalk.user.dto;
+package LinkUpTalk.user.presentation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -2,7 +2,7 @@ package LinkUpTalk.user.domain;
 
 import LinkUpTalk.auth.domain.Group;
 import LinkUpTalk.chat.domain.UserChatroom;
-import LinkUpTalk.user.dto.UserGetResDto;
+import LinkUpTalk.user.presentation.dto.UserGetResDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;

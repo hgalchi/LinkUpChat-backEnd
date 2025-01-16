@@ -3,7 +3,7 @@ package LinkUpTalk.auth.presentation;
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.auth.application.AuthService;
 import LinkUpTalk.common.response.ResponseCode;
-import LinkUpTalk.user.dto.UserCreateReqDto;
+import LinkUpTalk.user.presentation.dto.UserCreateReqDto;
 import LinkUpTalk.user.application.UserService;
 import LinkUpTalk.common.util.CookieUtil;
 import jakarta.servlet.http.Cookie;

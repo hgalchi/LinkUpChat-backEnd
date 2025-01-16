@@ -1,8 +1,8 @@
 package LinkUpTalk.user.presentation;
 
 import LinkUpTalk.common.response.ResponseCode;
-import LinkUpTalk.user.dto.UserModifyReqDto;
-import LinkUpTalk.user.dto.UserPasswordModifyReqDto;
+import LinkUpTalk.user.presentation.dto.UserModifyReqDto;
+import LinkUpTalk.user.presentation.dto.UserPasswordModifyReqDto;
 import LinkUpTalk.user.application.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

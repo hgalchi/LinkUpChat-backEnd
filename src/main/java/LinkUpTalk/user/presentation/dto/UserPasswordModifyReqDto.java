@@ -1,4 +1,4 @@
-package LinkUpTalk.user.dto;
+package LinkUpTalk.user.presentation.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
