@@ -1,6 +1,6 @@
 package LinkUpTalk.chat.presentation;
 
-import LinkUpTalk.chat.application.SocketService;
+import LinkUpTalk.chat.application.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class WebsocketController {
 
     private final SimpMessagingTemplate template;
-    private final SocketService socketService;
+    private final ChatService chatService;
 
 
 

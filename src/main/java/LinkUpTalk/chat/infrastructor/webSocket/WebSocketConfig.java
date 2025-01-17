@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.config;
+package LinkUpTalk.chat.infrastructor.webSocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,6 @@ import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
 
 @Configuration
 @EnableWebSocketMessageBroker
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
@@ -24,13 +23,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private static final String QUEUE = "/queue";
 
     private final ChannelInterceptor jwtChannelInterceptor;
-    private final StompSubProtocolErrorHandler customErrorHandler;
+    private final StompSubProtocolErrorHandler stompExceptionHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(ENDPOINT)
                 .setAllowedOrigins("*");
-        registry.setErrorHandler(customErrorHandler);
+        registry.setErrorHandler(stompExceptionHandler);
         //.withSockJS();
     }
 

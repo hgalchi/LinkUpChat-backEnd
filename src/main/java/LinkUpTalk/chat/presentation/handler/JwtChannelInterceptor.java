@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.presentation;
+package LinkUpTalk.chat.presentation.handler;
 
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
@@ -43,40 +43,15 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
             throw new MessageDeliveryException("Invalid STOMP frame");
         }
 
-        switch(accessor.getCommand()) {
-            case CONNECT:
-                handleConnect(accessor);
-                break;
-            case SUBSCRIBE:
-                handleSubscribe(accessor);
-                break;
-            case MESSAGE:
-                throw new MessageDeliveryException("Invalid command");
-            default:
-                break;
-        }
-        return message;
-    }
-
-    /**
-     * 토큰 인증
-     * 만료나 변조 시, 예외를 터트린다.
-     * return 토큰 인증 성공 시 사용자의 이메일을 반환한다.
-     */
-    //todo : jwtUtil에서 exceptio처리 정리하기
-    private void handleConnect(StompHeaderAccessor accessor) {
         String email =getEmailAndValidateToken(accessor);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         UsernamePasswordAuthenticationToken authentication=
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         accessor.setUser(authentication);
+
+        return message;
     }
 
-    private void handleSubscribe(StompHeaderAccessor accessor) {
-        String destination = Optional.ofNullable(accessor.getDestination())
-                .orElseThrow(() -> new MessageDeliveryException("Missing destination"));
-        checkDestination(destination);
-    }
     private String  getEmailAndValidateToken(StompHeaderAccessor accessor) {
         Optional<String> jwtTokenOptional = Optional.ofNullable(accessor.getFirstNativeHeader(AUTHORIZATION));
         String jwtToken = jwtTokenOptional
@@ -85,11 +60,5 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 .orElseThrow(() -> new BusinessException(ResponseCode.MALFORMED_JWT));
         Claims claims=jwtUtil.validateToken(jwtToken);
         return jwtUtil.getEmail(claims);
-    }
-
-    private void checkDestination(String destination) {
-        if (destination == null || (!destination.startsWith("/topic/room/") && !destination.startsWith("/user/queue/"))) {
-            throw new MessageDeliveryException("invalid destination");
-        }
     }
 }

@@ -1,8 +1,9 @@
-package LinkUpTalk.common.exception;
+package LinkUpTalk.chat.presentation.handler;
 
 import LinkUpTalk.common.response.ResponseCode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -13,18 +14,15 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 @Log4j2
-public class CustomErrorHandler extends StompSubProtocolErrorHandler {
-
-
-    //todo : http요청과 stomp 요청의 결합
-    public CustomErrorHandler() {
-        super();
-    }
+public class StompExceptionHandler extends StompSubProtocolErrorHandler {
 
     @Override
     public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
-
-        //MessageDeliverException("UNAUTHORIZED")
+        log.error("Stomp ExceptionHandler 호출");
+        if (ex instanceof MessageDeliveryException) {
+            Throwable cause = ex.getCause();
+            log.error("Stomp Exception Handler :"+cause);
+        }
         if (ex.getCause().getMessage().equals("UNAUTHORIZED")) {
             return errorMessage(ResponseCode.UNAUTHORIZED);
         }
