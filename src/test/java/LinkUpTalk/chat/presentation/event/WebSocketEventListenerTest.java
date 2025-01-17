@@ -1,6 +1,6 @@
-package com.example.LinkUpTalk.chat.controller;
-import LinkUpTalk.chat.presentation.SocketEventListener;
-import LinkUpTalk.chat.application.SocketService;
+package LinkUpTalk.chat.presentation.event;
+
+import LinkUpTalk.chat.application.ChatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,19 +17,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @SpringBootTest
-class SocketEventListenerTest {
+class WebSocketEventListenerTest {
 
     @Spy // ✅ 실제 객체를 감싸서 스파이 객체로 변경
     @InjectMocks
-    private SocketEventListener socketEventListener;
+    private WebSocketEventListener socketEventListener;
 
     @Mock
-    private SocketService socketService;
+    private ChatService socketService;
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;
