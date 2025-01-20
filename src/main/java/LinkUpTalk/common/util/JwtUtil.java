@@ -4,18 +4,18 @@ import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -29,30 +29,28 @@ public class JwtUtil {
     private Long accessExpirationTime;
 
     @Value("${jwt.secret-key}")
-    private String secret_key;
+    private String key;
 
-    private final String TOKEN_PREFIX = "Bearer";
+    private  SecretKey secretKey;
 
+    private final String BEARER_PREFIX = "Bearer ";
 
-    private final JwtParser jwtParser;
-
-    public JwtUtil() {
-        this.jwtParser = Jwts.parser().setSigningKey("secret_key");
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(key));
     }
 
     public String createToken(String email, List<String> roles, String category) {
 
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
-        claims.put("category", category);
-
         Long tokenExpirationTime = category.equals(TokenType.accessToken.name()) ? accessExpirationTime : refreshExpirationTime;
         Date tokenValidity = new Date(new Date().getTime() + TimeUnit.MINUTES.toMillis(tokenExpirationTime));
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
+        return BEARER_PREFIX+Jwts.builder()
+                .subject(email)
+                .claim("roles", roles)
+                .claim("category", category)
+                .expiration(tokenValidity)
+                .signWith(secretKey)
                 .compact();
     }
 
@@ -76,7 +74,8 @@ public class JwtUtil {
     }
 
     private Claims parseJwtClaims(String token) {
-        return jwtParser.parseClaimsJws(token).getBody();
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token).getPayload();
     }
 
     public String parseRefresh(HttpServletRequest req) {
@@ -93,8 +92,8 @@ public class JwtUtil {
     }
 
     public String resolveToken(String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(TOKEN_PREFIX.length());
+        if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
         }throw new BusinessException(ResponseCode.TOKEN_NOT_EXIST);
     }
 
