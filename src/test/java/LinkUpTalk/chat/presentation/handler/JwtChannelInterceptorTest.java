@@ -46,7 +46,6 @@ public class JwtChannelInterceptorTest {
     private MessageChannel messageChannel;
 
     @Test
-    @Tag("webSocketConnect")
     @DisplayName("웹 소켓 연결")
     void connect_validToken() {
         // Given
@@ -91,7 +90,6 @@ public class JwtChannelInterceptorTest {
     }
 
     @Test
-    @Tag("webSocketConnect")
     @DisplayName("웹 소켓 연결 실패_유효하지 않은 토큰")
     void connect_failWithExpiredToken(){
         // Given
