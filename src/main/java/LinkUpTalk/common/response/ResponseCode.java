@@ -30,6 +30,8 @@ public enum ResponseCode {
 
     SYSTEM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
 
+    USER_CHATROOM_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 방에 있는 사용자입니다."),
+
 
 
     //200

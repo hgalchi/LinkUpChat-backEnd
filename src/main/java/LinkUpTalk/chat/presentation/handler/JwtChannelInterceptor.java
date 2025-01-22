@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static org.springframework.messaging.simp.stomp.StompCommand.CONNECT;
+
 /**
  * 메세지가 채널로 전송되기 전 사전처리
  */
@@ -39,26 +41,30 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        if (accessor == null || accessor.getCommand() == null) {
-            throw new MessageDeliveryException("Invalid STOMP frame");
-        }
 
-        String email =getEmailAndValidateToken(accessor);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        UsernamePasswordAuthenticationToken authentication=
-                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        accessor.setUser(authentication);
+        if (accessor.getCommand().equals(CONNECT)) {
+            log.info("channelInterceptor connect");
+            String email =getEmailAndValidateToken(accessor);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+//            /*UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(email)
+//                    .password("password")
+//                    .build();*/
+
+            UsernamePasswordAuthenticationToken authentication=
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            accessor.setUser(authentication);
+        }
 
         return message;
     }
 
     private String  getEmailAndValidateToken(StompHeaderAccessor accessor) {
         Optional<String> jwtTokenOptional = Optional.ofNullable(accessor.getFirstNativeHeader(AUTHORIZATION));
-        String jwtToken = jwtTokenOptional
+        Claims claims = jwtTokenOptional
                 .filter(token -> token.startsWith(BEARER))
                 .map(token -> token.substring(BEARER.length()))
+                .map(token->jwtUtil.validateToken(token))
                 .orElseThrow(() -> new BusinessException(ResponseCode.MALFORMED_JWT));
-        Claims claims=jwtUtil.validateToken(jwtToken);
         return jwtUtil.getEmail(claims);
     }
 }

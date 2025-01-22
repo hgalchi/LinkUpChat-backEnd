@@ -18,6 +18,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+//todo : 대부분 util의 네이밍이 붙은 클래스는 static method만 제공한다. 의존관계를 설정하지 않아도 호출가능한 헬퍼 패턴이 주가됨
+//jwtParse로 변경 component인 만큼
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
