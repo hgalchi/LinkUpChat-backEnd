@@ -34,7 +34,7 @@ public class UserController {
     @PostMapping("/profile/{userId}")
     public ResponseEntity<ResponseCode> modify(@PathVariable Long userId, @Valid @RequestBody UserModifyReqDto reqDto) {
         userService.modify(userId,reqDto);
-        return ResponseEntity.ok(ResponseCode.STATE_SUCC);
+        return ResponseEntity.ok(ResponseCode.STATE_SUC);
     }
 
     /**
@@ -44,7 +44,7 @@ public class UserController {
     @PostMapping("/profile/password/{userId}")
     public ResponseEntity<ResponseCode> modifyPassword(@PathVariable Long userId,@Valid @RequestBody UserPasswordModifyReqDto reqDto) {
         userService.modifyPassword(userId,reqDto);
-        return ResponseEntity.ok(ResponseCode.STATE_SUCC);
+        return ResponseEntity.ok(ResponseCode.STATE_SUC);
     }
 
 }

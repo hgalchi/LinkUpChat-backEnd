@@ -1,7 +1,7 @@
 package LinkUpTalk.user.domain;
 
 import LinkUpTalk.auth.domain.Group;
-import LinkUpTalk.chat.domain.UserChatroom;
+import LinkUpTalk.chat.domain.ChatRoomDetail;
 import LinkUpTalk.user.presentation.dto.UserGetResDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +26,6 @@ public class User {
     @Column(length = 50, nullable = false)
     private String name;
 
-    //todo : 유니크 속성 추가
     @Column(unique = true)
     private String email;
 
@@ -43,9 +42,11 @@ public class User {
     @Builder.Default
     private Set<Group> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    //chatRoom을 고나리하느넉ㄴ 더 생각해봐야할 듯
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval = true)
     @Builder.Default
-    private Set<UserChatroom> chatRooms = new HashSet<>();
+    private Set<ChatRoomDetail> chatRooms = new HashSet<>();
 
     public static User of(String name, String password, String email){
         return User.builder()

@@ -45,7 +45,7 @@ public class AuthController {
     @DeleteMapping("/signOut")
     public ResponseEntity<ResponseCode> delete(@PathVariable Long userId) {
         userService.delete(userId);
-        return ResponseEntity.ok(ResponseCode.STATE_SUCC);
+        return ResponseEntity.ok(ResponseCode.STATE_SUC);
     }
 
     /**
