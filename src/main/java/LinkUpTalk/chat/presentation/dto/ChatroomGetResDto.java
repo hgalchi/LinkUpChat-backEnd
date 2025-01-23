@@ -16,9 +16,9 @@ public class ChatroomGetResDto {
 
     private String name;
 
-    private int curCount;
+    private int participantCount;
 
-    private int maxCount;
+    private int capacity;
 
-    private List<String> members;
+    private List<String> participants;
 }

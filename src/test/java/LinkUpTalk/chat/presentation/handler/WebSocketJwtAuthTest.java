@@ -91,7 +91,7 @@ class WebSocketJwtAuthTest {
         //given
 
         StompHeaders headers = new StompHeaders();
-        headers.add("Authorization", VALID_TOKEN);
+        headers.add("Authorization", validToken);
 
         //when
         StompSession session = stompClient.connect(url, new WebSocketHttpHeaders(), headers, new StompSessionHandlerAdapter() {

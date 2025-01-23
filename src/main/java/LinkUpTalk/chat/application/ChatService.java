@@ -1,12 +1,13 @@
 package LinkUpTalk.chat.application;
 
-import LinkUpTalk.chat.domain.constant.ChatRoomRole;
+import LinkUpTalk.chat.domain.ChatRoomDetail;
+import LinkUpTalk.chat.domain.constant.ChatRoomRoleType;
+import LinkUpTalk.chat.domain.repository.ChatMessageRepository;
+import LinkUpTalk.chat.domain.repository.ChatRoomRepository;
+import LinkUpTalk.chat.domain.repository.UserChatRoomRepository;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.chat.domain.ChatMessage;
 import LinkUpTalk.chat.domain.ChatRoom;
-import LinkUpTalk.chat.domain.UserChatroom;
-import LinkUpTalk.chat.infrastructor.ChatmessageRepository;
-import LinkUpTalk.chat.infrastructor.ChatroomRepository;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDto;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
@@ -18,116 +19,79 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class ChatService {
 
-    //todo : solid원칙으로 하나의 책임을 지는데 나눠야될 필요성이 있는지 생각해보기
 
-    private final ChatroomRepository chatRoomRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
-    private final ChatmessageRepository chatMessageRepository;
+    private final UserChatRoomRepository userChatroomRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
-    /**
-     * 채팅방 입장Us
-     * @param email 유저 email
-     * @param roomId 입장하는 room pk
-     */
-    //todo : 채팅방 비밀번호 설정
     @Transactional
-    public void join(String email,Long roomId) {
-        ChatRoom chatRoom = findByRoomId(roomId);
-        checkMemberCount(chatRoom);
-        User user = findByEmail(email);
+    public void join(String email, Long roomId) {
+        ChatRoom chatRoom = findChatRoom(roomId);
+        User user = findUser(email);
+        checkIfUserExists(chatRoom, user);
+        checkRoomCapacity(chatRoom);
 
-        UserChatroom userChatroom = UserChatroom.of(chatRoom, user, ChatRoomRole.MEMBER);
-        chatRoom.addUser(userChatroom);
-        chatRoom.setUserCount(chatRoom.getCount()+1);
+        ChatRoomDetail chatroomDetail = ChatRoomDetail.of(chatRoom, user, ChatRoomRoleType.MEMBER);
+        chatRoom.addUser(chatroomDetail);
     }
 
-
-
-    /**
-     * 채팅방 나가기
-     * @param email 유저 email
-     * @param roomId 퇴장하는 room pk
-     */
+    //사용자가 방에서 나감.
     @Transactional
     public void leave(String email,Long roomId) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("회원을 찾을 수 없습니다."));
-        ChatRoom chatroom = chatRoomRepository.findById(roomId).orElseThrow(() -> new UsernameNotFoundException("채팅방을 찾을 수 없습니다."));
-        //UserChatroom userChatroom = userChatroomRepository.findByUserAndChatRoom(user, chatroom).orElseThrow(() -> new UsernameNotFoundException("채팅방에 해당 회원이 존재하지 않습니다."));
-        //chatroom.removeDetail(userChatroom);
-        chatroom.setUserCount(chatroom.getCount()-1);
-        chatRoomRepository.save(chatroom);
+        User user = findUser(email);
+        ChatRoom chatRoom = findChatRoom(roomId);
+        ChatRoomDetail leavingUser = findLeavingUser(chatRoom, user);
+
+        chatRoom.removeUser(leavingUser);
     }
 
-    /**
-     * 채팅 메세지 저장
-     * @param message 유저가 보낸 메세지
-     * @param roomId room pk
-     * @param email 유저 email
-     */
+    //메세지 전송
+    @Transactional
     public void saveMessage(ChatMessageDto message, Long roomId, String email) {
-        ChatRoom chatroom = chatRoomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+        ChatRoom chatRoom = findChatRoom(roomId);
         ChatMessage chatmessage = ChatMessage.builder()
                 .message(message.getMessage())
-                .chatRoom(chatroom)
+                .chatRoom(chatRoom)
                 .sender(email)
-                .time(LocalDateTime.now())
                 .build();
+
         chatMessageRepository.save(chatmessage);
     }
 
-    public void saveMessageWithImage(ChatMessageDto dto,Long roomId, String email) {
-        ChatRoom chatroom = chatRoomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-    }
-
-    public void enterRoom(String email, Long roomId) {
-        //새로입장한 유저일경우
-        // 재접속한 유저일경우
-        // 잘못된 요청일 경우 ( 채팅룸에 존재하지 않은 유저가 데이터를 요청할 경우 )
-
-    }
-
-    private void checkMemberCount(ChatRoom chatroom) {
-        if (chatroom.getMaxCount() <= chatroom.getCount()) {
+    //todo : race condition 생각하기
+    private void checkRoomCapacity(ChatRoom chatroom) {
+        if (chatroom.getCapacity() <= chatroom.getParticipantCount()) {
             throw new MessageDeliveryException("현재 채팅방 인원이 초과되었습니다.");
         }
     }
+    private void checkIfUserExists(ChatRoom chatRoom,User user){
+        userChatroomRepository.findByChatRoom(chatRoom).stream()
+                .filter(userChatRoom -> userChatRoom.getUser() == user)
+                .findAny()
+                .ifPresent(userChatroom -> {
+                    //이미 채팅룸에 존재하는 회원임
+                    return;
+                });
+    }
 
-    private ChatRoom findByRoomId(Long roomId){
+    private ChatRoom findChatRoom(Long roomId){
         return chatRoomRepository.findById(roomId).orElseThrow(() -> new UsernameNotFoundException("채팅방을 찾을 수 없습니다."));
     }
 
-    private User findByEmail(String email) {
+    private User findUser(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("회원을 찾을 수 없습니다."));
     }
 
-    private String BinaryImageChange(String imageDate) {
-
-        //","을 기준으로 바이트 코드를 나눈다.
-        String[] Strings = imageDate.split(",");
-        String base64 = Strings[1];
-        String extension = "";
-
-        //if문을 통해 확장자명을 지정
-        switch (Strings[0]) {
-            case "data:image/jpeg;base64":
-                extension = "jpeg";
-            case "data:image/png;base64":
-                extension = "png";
-            default:
-                extension = "jpg";
-        }
-        //파일을 db에 저장하고 찾는 방법
-        log.info("이미지 바이너리 데이터 : " + base64);
-
-        //db에 폴더 위치를 저장
-        return " ";
-
+    private ChatRoomDetail findLeavingUser (ChatRoom chatRoom, User user) {
+        return chatRoom.getParticipants().stream()
+                .filter(userChatRoom -> userChatRoom.getUser() == user)
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ResponseCode.CHATROOM_USER_NOT_FOUND_IN));
     }
 }

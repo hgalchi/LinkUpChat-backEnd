@@ -13,16 +13,18 @@ import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBl
 @NoArgsConstructor
 @Builder
 @Getter
-public class GroupChatRequestDto {
+public class ChatRoomModifyReqDto {
+
+    private Long id;
 
     @NotBlank(message = "유저식별자는 필수 입력값입니다.")
     private Long userId;
 
-    @Size(min = 1, max =10 ,message="1~10자리로 입력해주세요")
+    @Size(min = 1, max =20 ,message="1~20자리로 입력해주세요")
     @NotBlank(message = "채팅방 이름은 필수 입력값입니다.")
     private String name;
 
-    @Min(3)@Max(8)
+    @Min(3)@Max(10)
     @NotBlank(message = "최대인원 수는 필수 입력값입니다.")
-    private int maxCount;
+    private int capacity;
 }
