@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ChatRoomRole {
+public enum ChatRoomRoleType {
     HOST, MEMBER,
 }

@@ -1,10 +1,11 @@
 package LinkUpTalk.chat.application;
 
-import LinkUpTalk.chat.domain.constant.ChatRoomRole;
+import LinkUpTalk.chat.domain.ChatRoomDetail;
+import LinkUpTalk.chat.domain.constant.ChatRoomRoleType;
+import LinkUpTalk.chat.domain.repository.ChatRoomRepository;
+import LinkUpTalk.chat.domain.repository.UserChatRoomRepository;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.chat.domain.ChatRoom;
-import LinkUpTalk.chat.infrastructor.ChatroomRepository;
-import LinkUpTalk.chat.infrastructor.UserChatroomRepository;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.user.domain.repository.UserRepository;
@@ -19,37 +20,43 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatResourceAuthService {
 
-    private final ChatroomRepository chatroomRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
-    private final UserChatroomRepository userChatroomRepository;
+    private final UserChatRoomRepository userChatroomRepository;
 
-    /**
-     * 사용자가 리소스의 주인임을 체크
-     */
-    public boolean isRoomOwner(Authentication authentication, Long roomId) {
-        ChatRoom chatroom = chatroomRepository.findById(roomId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-
-        User roomHost = userChatroomRepository.findAllByChatRoom(chatroom)
-                .stream()
-                .filter(f -> f.getRole().equals(ChatRoomRole.HOST))
-                .map(m -> m.getUser())
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-
-        User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+    public boolean isHost(Authentication authentication, Long chatRoomId) {
+        ChatRoom chatRoom = findChatRoom(chatRoomId);
+        User roomHost = findChatRoomHost(chatRoom);
+        User user = findUser(authentication.getName());
 
         return user.getId().equals(roomHost.getId());
     }
 
-    public boolean isRoomMemeber(Authentication authentication, Long roomId) {
-        ChatRoom chatroom=chatroomRepository.findById(roomId).get();
-        User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-        return userChatroomRepository.existsByUserAndChatRoom(user, chatroom);
+    public boolean isParticipant(Authentication authentication, Long chatRoomId) {
+        ChatRoom chatroom= findChatRoom(chatRoomId);
+        User user = findUser(authentication.getName());
+
+        return user.getChatRooms().stream()
+                .anyMatch(userChatRoom -> userChatRoom.getChatRoom() == chatroom);
     }
 
+    private User findChatRoomHost(ChatRoom chatRoom) {
+        return userChatroomRepository.findByChatRoom(chatRoom)
+                .stream()
+                .filter(userChatRoom -> userChatRoom.getRole().equals(ChatRoomRoleType.HOST))
+                .map(ChatRoomDetail::getUser)
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+    }
 
+    private ChatRoom findChatRoom(Long chatRoomId){
+        return chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+    }
+
+    private User findUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+    }
 
 }

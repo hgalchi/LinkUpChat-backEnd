@@ -2,10 +2,10 @@ package LinkUpTalk.chat.infrastructor;
 
 
 import LinkUpTalk.chat.domain.ChatMessage;
+import LinkUpTalk.chat.domain.repository.ChatMessageRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface ChatmessageRepository extends JpaRepository<ChatMessage, Long> {
+public interface JpaChatMessageRepository extends JpaRepository<ChatMessage, Long>, ChatMessageRepository {
 
 }
