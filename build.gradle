@@ -54,6 +54,9 @@ dependencies {
 	// mongo
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	//test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

@@ -1,7 +1,9 @@
 package LinkUpTalk.chat.presentation.handler;
 
 import LinkUpTalk.chat.domain.constant.MessageType;
+import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
 import LinkUpTalk.common.exception.BusinessException;
+import LinkUpTalk.common.response.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
@@ -18,15 +20,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WebSocketGlobalExceptionHandler {
 
-    private final SimpMessagingTemplate template;
     private static final String ERROR_DESTINATION = "/queue/errors";
+    private final SimpMessagingTemplate template;
 
     @MessageExceptionHandler(BusinessException.class)
     public void handleBusinessException(Principal principal, @Payload String destination, BusinessException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", MessageType.ERROR.name());
-        body.put("reason", ex.getMessage());
-        //ErrorMessage errorMessge=ErrorMessage.of();
-        template.convertAndSendToUser(principal.getName(), ERROR_DESTINATION,body);
+        log.info("Send Exception cause :{}", ex.getMessage());
+
+        ChatMessageResDto res = ChatMessageResDto.builder()
+                .content(ex.getMessage())
+                .messageType(MessageType.ERROR)
+                .build();
+        template.convertAndSendToUser(principal.getName(), ERROR_DESTINATION,res);
     }
 }

@@ -23,3 +23,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=chatUser    # 인증계정 username
       - MONGO_INITDB_ROOT_PASSWORD=chatDb1234    # 인증계정 pwd
 
+  redis:
+    image: redis:latest
+    container_name: redis-total
+    ports:
+      - 6380:6379

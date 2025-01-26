@@ -1,37 +1,38 @@
 package LinkUpTalk.chat.presentation;
 
 import LinkUpTalk.chat.application.ChatService;
-import LinkUpTalk.chat.presentation.dto.ChatMessageDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageDmReqDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @Log4j2
-public class WebsocketController {
+public class ChatController {
 
-    private final SimpMessagingTemplate template;
     private final ChatService chatService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String CHANNEL_TOPIC = "chatroom";
 
-    //브로드캐스팅
-    @MessageMapping(value = "/room/{roomId}/message")
-    public void message(@Payload ChatMessageDto message,
+
+    //todo : dto 클래스 만들기
+    @MessageMapping(value = "/chat/room/{roomId}")
+    public void message(@Payload String message,
                         @DestinationVariable Long roomId,
                         Principal principal) {
+        log.info("webSocket Send : {} 사용자가 {}채팅방에 메시지를 전송",principal.getName(),roomId);
 
-        String email = principal.getName();
+        ChatMessageReqDto roomMessage = chatService.saveMessage(principal.getName(), roomId, message);
 
-        template.convertAndSend("/topic/room/" + roomId, message);
-
+        redisTemplate.convertAndSend(CHANNEL_TOPIC, roomMessage);
     }
 
     /*//todo : 401 인증실패, 404 인가 실패

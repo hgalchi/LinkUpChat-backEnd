@@ -1,13 +1,24 @@
 package LinkUpTalk.chat.presentation.event;
 
 import LinkUpTalk.chat.application.ChatService;
+import LinkUpTalk.chat.domain.constant.MessageType;
+import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
+import LinkUpTalk.common.exception.BusinessException;
+import LinkUpTalk.common.response.ErrorResponse;
+import LinkUpTalk.common.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.*;
+
+import java.security.Principal;
+import java.util.Objects;
+import java.util.Optional;
 // todo : 채팅방 데이터는 sql 채팅 메시지는 noSql
 // evnetListeneer-> controller로 변경할지 생각해보기
 
@@ -16,30 +27,41 @@ import org.springframework.web.socket.messaging.*;
 @Log4j2
 public class WebSocketEventListener {
 
-    private final SimpMessagingTemplate messagingTemplate;
     private final ChatService socketService;
+    private final RedisTemplate<String,Object> redisTemplate;
+    private final SimpMessagingTemplate messageTemplate;
+    private static final String CHANNEL_TOPIC = "chatroom";
 
     @EventListener
     public void handleSocketConnectListener(SessionConnectEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        log.info("WebSocket Connect");
+        StompHeaderAccessor accessor = getStompHeaderAccessor(event);
         String email = accessor.getUser().getName();
+
         log.info("{} 사용자 연결",email);
     }
 
-    //todo : sendtouser로 초기데이터 보내는 작업 추가
     @EventListener
     public void handleSocketSubscribeListener(SessionSubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String destination = accessor.getDestination();
-        String email = accessor.getUser().getName();
-        Long roomId = Long.parseLong(destination.split("/")[3]);
+        String email = getEmail(accessor);
+        try {
+            String destination = getDestination(accessor);
+            log.info("{} 사용자 {} 채팅방 구독", email, destination);
 
-        log.info("{} 사용자 {} 채팅방 입장",email,roomId);
-
-        //그룹채팅 구독
-        if(destination.startsWith("/sub/room/")) {
-            socketService.join(email, roomId);
-            messagingTemplate.convertAndSend(destination, email + "님이 입장했습니다.");
+            if(destination.startsWith("/topic/room/")) {
+                Long roomId = parseRoomId(destination);
+                ChatMessageReqDto message=socketService.join(email, roomId);
+                redisTemplate.convertAndSend(CHANNEL_TOPIC, message);
+            //todo : event 비동기 처리 exception
+            }
+        }catch (BusinessException ex) {
+            log.error("Subscribe Exception Cause: {}", ex.getMessage());
+            ChatMessageResDto res = ChatMessageResDto.builder()
+                    .content(ex.getMessage())
+                    .messageType(MessageType.ERROR)
+                    .build();
+            messageTemplate.convertAndSendToUser(email, "/queue/errors",res);
         }
     }
 
@@ -47,19 +69,37 @@ public class WebSocketEventListener {
     public void handleUnSubscribeEvent(SessionUnsubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String email = accessor.getUser().getName();
-        String destination = accessor.getDestination();
-        Long roomId = Long.parseLong(destination.split("/")[3]);
+        Long roomId = parseRoomId(getDestination(accessor));
 
+        socketService.leave(email, roomId);
+
+        //todo : 세션 처리 필요함.
         log.info("{}사용자 {} 채팅방을 퇴장",email,roomId);
-        messagingTemplate.convertAndSend(accessor.getDestination(), email + "이 채팅방을 나갔습니다.");
     }
-
 
     @EventListener
     public void handleWebSocketDisconnectListner(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String email = accessor.getUser().getName();
         log.info("{} 사용자 연결 끊김",email);
+    }
+
+    private StompHeaderAccessor getStompHeaderAccessor(SessionConnectEvent event){
+        return StompHeaderAccessor.wrap(event.getMessage());
+    }
+
+    private String getDestination(StompHeaderAccessor accessor) {
+        return Optional.ofNullable(accessor.getDestination())
+                .orElseThrow(() -> new BusinessException(ResponseCode.STOMP_NOT_FOUND_DESTINATION));
+    }
+
+    //todo : of와 ofnullable 비교
+    private String getEmail(StompHeaderAccessor accessor) {
+        return accessor.getUser().getName();
+    }
+
+    private Long parseRoomId(String destination) {
+        return Long.parseLong(destination.split("/")[3]);
     }
 
 }
