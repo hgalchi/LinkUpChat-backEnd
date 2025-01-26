@@ -51,6 +51,9 @@ dependencies {
 	// postgresql
 	implementation 'org.postgresql:postgresql:42.6.0'
 
+	// mongo
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
 	//test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

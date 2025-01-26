@@ -3,28 +3,31 @@ package LinkUpTalk.chat.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Document(collection="chatting_content")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Where(clause = "deleted = false")
 public class ChatMessage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
-    private String message;
-
-    @Column(nullable = false)
     private String sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chatroom_id")
-    private ChatRoom chatRoom;
+    private Long roomId;
+
+    private String content;
+
+    public static ChatMessage of(String sender, Long roomId, String content) {
+        return ChatMessage.builder()
+                .sender(sender)
+                .roomId(roomId)
+                .content(content)
+                .build();
+    }
 }

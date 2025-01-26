@@ -1,5 +1,6 @@
 version: '3.7'
 services:
+
   postgres:
     container_name: postgres-total
     image: postgres:latest
@@ -12,3 +13,13 @@ services:
       - TZ=Asia/Seoul
     volumes:
       - "./init/:/docker-entrypoint-initdb.d"
+
+  mongo:
+    image: "mongo:latest"
+    container_name: mongo-total
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=chatUser    # 인증계정 username
+      - MONGO_INITDB_ROOT_PASSWORD=chatDb1234    # 인증계정 pwd
+
