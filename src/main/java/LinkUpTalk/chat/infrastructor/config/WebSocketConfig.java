@@ -21,11 +21,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private static final String ENDPOINT = "/stomp";
     private static final String TOPIC = "/topic";
     private static final String PUB = "/pub";
+    private static final String USER = "/user";
     private static final String QUEUE = "/queue";
 
     private final ChannelInterceptor jwtChannelInterceptor;
     private final StompSubProtocolErrorHandler stompErrorHandler;
-
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -37,11 +37,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker(TOPIC);
-        config.setUserDestinationPrefix(QUEUE);
+        config.enableSimpleBroker(TOPIC,QUEUE);
+        config.setUserDestinationPrefix(USER);
         config.setApplicationDestinationPrefixes(PUB);
     }
-
 
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(jwtChannelInterceptor);

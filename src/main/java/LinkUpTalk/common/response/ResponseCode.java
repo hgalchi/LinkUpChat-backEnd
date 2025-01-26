@@ -10,11 +10,14 @@ import org.springframework.http.HttpStatusCode;
 public enum ResponseCode {
 
     //400
-    NOT_FOUND(HttpStatus.NOT_FOUND, "요청 URL 오류"),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 유저를 찾을 수 없습니다."),
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 채팅룸을 찾을 수 없습니다."),
     METHOD_NOT_ALLOW(HttpStatus.METHOD_NOT_ALLOWED, "허락되지 않은 요청"),
 
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효성 검증 오류"),
     INVALID_DESTINATION(HttpStatus.BAD_REQUEST, "유효하지 않은 경로입니다."),
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "올바르지 않은 토큰입니다."),
 
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
     MALFORMED_JWT(HttpStatus.UNAUTHORIZED, "올바르지 않은 토큰입니다."),

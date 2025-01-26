@@ -1,5 +1,6 @@
 package LinkUpTalk.chat.presentation.handler;
 
+import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -23,33 +24,23 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
 
     @Override
     public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
-        if (ex instanceof MessageDeliveryException) {
-            Throwable cause = ex.getCause();
-            log.error("Stomp ExceptionHandler cause:" + cause);
-            if (cause instanceof AccessDeniedException) {
-                return errorMessage(ResponseCode.FORBIDDEN);
-            }
-            if (isJwtException(cause)) {
-                return errorMessage(ResponseCode.SIGNATURE_JWT);
-            }
+
+        log.error("Stomp Error Handler 인증 오류");
+        Throwable cause = ex.getCause();
+        if (cause instanceof BusinessException) {
+            ResponseCode responseCode = ((BusinessException) cause).getErrorcode();
+            return errorMessage(responseCode);
         }
         return super.handleClientMessageProcessingError(clientMessage, ex);
     }
 
-    private boolean isJwtException(Throwable ex) {
-        return ex instanceof SignatureException
-                || ex instanceof MalformedJwtException
-                || ex instanceof ExpiredJwtException;
-    }
-
     private Message<byte[]> errorMessage(ResponseCode code) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+        log.error("Connect Exception cause : {}", code.getMessage());
 
-        String message = String.valueOf(code.getMessage());
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
         accessor.setMessage(String.valueOf(code.getStatus()));
         accessor.setLeaveMutable(true);
 
-        return MessageBuilder.createMessage(message.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders());
+        return MessageBuilder.createMessage(code.getMessage().getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders());
     }
-
 }

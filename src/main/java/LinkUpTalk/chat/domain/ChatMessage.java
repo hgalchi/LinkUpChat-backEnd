@@ -1,5 +1,7 @@
 package LinkUpTalk.chat.domain;
 
+import LinkUpTalk.chat.domain.constant.MessageType;
+import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
@@ -23,11 +25,24 @@ public class ChatMessage {
 
     private String content;
 
-    public static ChatMessage of(String sender, Long roomId, String content) {
+    private MessageType messageType;
+
+    public static ChatMessage of(String sender, Long roomId, String content,MessageType messageType) {
         return ChatMessage.builder()
                 .sender(sender)
                 .roomId(roomId)
                 .content(content)
+                .messageType(messageType)
                 .build();
     }
+
+    public ChatMessageReqDto toChatMessageReqDto() {
+        return ChatMessageReqDto.builder()
+                .sender(sender)
+                .content(content)
+                .messageType(messageType)
+                .destination(roomId)
+                .build();
+    }
+
 }

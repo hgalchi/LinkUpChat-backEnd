@@ -8,8 +8,7 @@ import lombok.Getter;
 public enum MessageType {
     CHAT,
     JOIN,
-    LEAVE,
     ERROR
 }
-//CHAT,JOIN,FRIEND_ONLINE,FRIEND_OFFLINE
+//CHATFRIEND_ONLINE,FRIEND_OFFLINE
 

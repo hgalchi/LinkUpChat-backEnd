@@ -31,6 +31,8 @@ import java.security.SignatureException;
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         log.error(ex.getMessage());
@@ -97,10 +99,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ErrorResponse handleRuntimeException(RuntimeException ex) {
         log.error(ex.getMessage());
         return ErrorResponse.of(ResponseCode.SYSTEM_ERROR);
-    }
-
-    @MessageExceptionHandler(BusinessException.class)
-    public void handleMessageBusinessException(Message<?> message) {
-        log.error("Error occurred : {}", message);
     }
 }
