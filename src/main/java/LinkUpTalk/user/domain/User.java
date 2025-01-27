@@ -1,12 +1,14 @@
 package LinkUpTalk.user.domain;
 
-import LinkUpTalk.auth.domain.Group;
+import LinkUpTalk.auth.domain.Roles;
+import LinkUpTalk.common.domain.BaseEntity;
 import LinkUpTalk.chat.domain.ChatRoomDetail;
 import LinkUpTalk.user.presentation.dto.UserGetResDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 @Where(clause = "deleted = false")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,16 +37,15 @@ public class User {
     @Builder.Default
     private boolean deleted = false;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE},fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default
-    private Set<Group> roles = new HashSet<>();
+    private Set<Roles> roles = new HashSet<>();
 
-    //chatRoom을 고나리하느넉ㄴ 더 생각해봐야할 듯
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval = true)
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     @Builder.Default
     private Set<ChatRoomDetail> chatRooms = new HashSet<>();
 
@@ -62,11 +63,11 @@ public class User {
                 .name(name)
                 .email(email)
                 .groups(roles.stream()
-                        .map(Group::getName).toList())
+                        .map(Roles::getName).toList())
                 .build();
     }
-    public void addUserGroups(Group group) {
-        roles.add(group);
+    public void addRole(Roles roles) {
+        this.roles.add(roles);
     }
 
     public void encodePassword(String encodePassword) {
@@ -84,5 +85,7 @@ public class User {
 
     public void delete() {
         this.deleted=true;
+        this.deleteEntity(LocalDateTime.now());
+        this.chatRooms.forEach(ChatRoomDetail::delete);
     }
 }

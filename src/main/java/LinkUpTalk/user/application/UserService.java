@@ -1,5 +1,6 @@
 package LinkUpTalk.user.application;
 
+import LinkUpTalk.auth.domain.Repository.RoleRepository;
 import LinkUpTalk.auth.domain.Roles;
 import LinkUpTalk.auth.domain.constant.RoleType;
 import LinkUpTalk.auth.domain.constant.TokenType;
@@ -11,7 +12,6 @@ import LinkUpTalk.user.presentation.dto.UserCreateReqDto;
 import LinkUpTalk.user.presentation.dto.UserGetResDto;
 import LinkUpTalk.user.presentation.dto.UserModifyReqDto;
 import LinkUpTalk.common.exception.BusinessException;
-import LinkUpTalk.auth.domain.Repository.GroupRepository;
 import LinkUpTalk.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +25,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final GroupRepository groupRepository;
+    private final RoleRepository groupRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 

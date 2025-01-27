@@ -1,6 +1,7 @@
 package LinkUpTalk.chat.domain;
 
 import LinkUpTalk.chat.domain.constant.ChatRoomRoleType;
+import LinkUpTalk.common.domain.BaseEntity;
 import LinkUpTalk.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import org.hibernate.annotations.Where;
 @Getter
 @Builder
 @Where(clause = "deleted = false")
-public class ChatRoomDetail {
+public class ChatRoomDetail extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,7 +43,7 @@ public class ChatRoomDetail {
                 .build();
     }
 
-    void delete(){
+    public void delete(){
         this.deleted = true;
     }
 }

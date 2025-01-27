@@ -1,12 +1,12 @@
 package LinkUpTalk.auth.presentation;
 
+import LinkUpTalk.auth.domain.Repository.RefreshRepository;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.auth.domain.Refresh;
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.user.presentation.dto.UserCreateReqDto;
 import LinkUpTalk.common.util.JwtUtil;
 import LinkUpTalk.user.domain.User;
-import LinkUpTalk.auth.domain.Repository.RefreshRepository;
 import LinkUpTalk.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;

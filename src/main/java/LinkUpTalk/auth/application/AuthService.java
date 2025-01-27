@@ -1,14 +1,14 @@
 package LinkUpTalk.auth.application;
 
+import LinkUpTalk.auth.domain.Repository.RefreshRepository;
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.auth.domain.Refresh;
+import LinkUpTalk.auth.infrastructor.JpaRefreshRepository;
 import LinkUpTalk.user.domain.User;
-import LinkUpTalk.auth.domain.Repository.RefreshRepository;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.util.JwtUtil;
 import LinkUpTalk.user.domain.repository.UserRepository;
-import LinkUpTalk.user.infrastructor.JpaUserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -47,7 +47,7 @@ public class AuthService {
                 .expiration(jwtUtil.getRefreshExpireTime())
                 .build();
 
-        refreshRepository.deleteByRefresh(refreshToken);
+
         refreshRepository.save(newRefresh);
 
         return token;

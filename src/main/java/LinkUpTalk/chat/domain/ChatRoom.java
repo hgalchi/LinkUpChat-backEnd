@@ -1,12 +1,15 @@
 package LinkUpTalk.chat.domain;
 
+import LinkUpTalk.chat.domain.constant.ChatRoomType;
 import LinkUpTalk.chat.presentation.dto.ChatroomGetResDto;
+import LinkUpTalk.common.domain.BaseEntity;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +19,7 @@ import java.util.Set;
 @Getter
 @Builder
 @Where(clause = "deleted = false")
-public class ChatRoom {
+public class ChatRoom extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,19 +37,24 @@ public class ChatRoom {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted=false;
+    private boolean deleted=false;
+
+    @Column(nullable = false)
+    private ChatRoomType chatRoomType;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private Set<ChatRoomDetail> participants = new HashSet<>();
 
-    public static ChatRoom of(String name, int capacity) {
+    public static ChatRoom of(String name, int capacity, ChatRoomType chatRoomType) {
         return ChatRoom.builder()
                 .name(name)
                 .capacity(capacity)
+                .chatRoomType(chatRoomType)
                 .build();
     }
+
     public ChatroomGetResDto toDto(){
         return ChatroomGetResDto.builder()
                 .id(id)
@@ -76,7 +84,8 @@ public class ChatRoom {
     }
 
     public void delete() {
-        this.isDeleted=true;
+        this.deleted=true;
+        this.deleteEntity(LocalDateTime.now());
         this.participants.forEach(ChatRoomDetail::delete);
     }
 }

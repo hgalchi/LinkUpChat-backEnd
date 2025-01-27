@@ -1,5 +1,6 @@
 package LinkUpTalk.auth.domain;
 
+import LinkUpTalk.common.domain.BaseEntity;
 import LinkUpTalk.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Refresh {
+public class Refresh extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
