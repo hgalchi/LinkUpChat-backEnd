@@ -31,7 +31,7 @@ public class ChatRoomDetail {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted=false;
+    private boolean deleted=false;
 
 
     public static ChatRoomDetail of(ChatRoom chatRoom, User user, ChatRoomRoleType chatRoomRole) {
@@ -43,6 +43,6 @@ public class ChatRoomDetail {
     }
 
     void delete(){
-        this.isDeleted = true;
+        this.deleted = true;
     }
 }

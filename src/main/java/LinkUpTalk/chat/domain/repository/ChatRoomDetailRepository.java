@@ -6,7 +6,7 @@ import LinkUpTalk.user.domain.User;
 
 import java.util.List;
 
-public interface UserChatRoomRepository {
+public interface ChatRoomDetailRepository {
 
     List<ChatRoomDetail> findByChatRoom(ChatRoom chatroom);
 

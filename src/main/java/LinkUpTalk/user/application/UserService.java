@@ -1,6 +1,6 @@
 package LinkUpTalk.user.application;
 
-import LinkUpTalk.auth.domain.Group;
+import LinkUpTalk.auth.domain.Roles;
 import LinkUpTalk.auth.domain.constant.RoleType;
 import LinkUpTalk.auth.domain.constant.TokenType;
 import LinkUpTalk.user.presentation.dto.UserPasswordModifyReqDto;
@@ -88,9 +88,9 @@ public class UserService {
         }
     }
     private void updateCustomerGroup(User userEntity) {
-        Group group = groupRepository.findByCode(RoleType.CUSTOMER.getRole())
+        Roles roles = groupRepository.findByCode(RoleType.CUSTOMER.getRole())
                 .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-        userEntity.addUserGroups(group);
+        userEntity.addRole(roles);
     }
 
     private String issueAccessToken(User user) {

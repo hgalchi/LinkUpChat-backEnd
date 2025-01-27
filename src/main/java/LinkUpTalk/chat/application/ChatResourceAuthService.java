@@ -3,7 +3,7 @@ package LinkUpTalk.chat.application;
 import LinkUpTalk.chat.domain.ChatRoomDetail;
 import LinkUpTalk.chat.domain.constant.ChatRoomRoleType;
 import LinkUpTalk.chat.domain.repository.ChatRoomRepository;
-import LinkUpTalk.chat.domain.repository.UserChatRoomRepository;
+import LinkUpTalk.chat.domain.repository.ChatRoomDetailRepository;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.chat.domain.ChatRoom;
 import LinkUpTalk.common.response.ResponseCode;
@@ -22,7 +22,7 @@ public class ChatResourceAuthService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
-    private final UserChatRoomRepository userChatroomRepository;
+    private final ChatRoomDetailRepository chatroomDetailRepository;
 
     public boolean isHost(Authentication authentication, Long chatRoomId) {
         ChatRoom chatRoom = findChatRoom(chatRoomId);
@@ -41,7 +41,7 @@ public class ChatResourceAuthService {
     }
 
     private User findChatRoomHost(ChatRoom chatRoom) {
-        return userChatroomRepository.findByChatRoom(chatRoom)
+        return chatroomDetailRepository.findByChatRoom(chatRoom)
                 .stream()
                 .filter(userChatRoom -> userChatRoom.getRole().equals(ChatRoomRoleType.HOST))
                 .map(ChatRoomDetail::getUser)

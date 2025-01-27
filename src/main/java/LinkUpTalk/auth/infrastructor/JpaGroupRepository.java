@@ -1,10 +1,10 @@
 package LinkUpTalk.auth.infrastructor;
 
-import LinkUpTalk.auth.domain.Group;
+import LinkUpTalk.auth.domain.Roles;
 
 import java.util.Optional;
 
 public interface JpaGroupRepository {
-    Optional<Group> findByCode(String code);
+    Optional<Roles> findByCode(String code);
 
 }
