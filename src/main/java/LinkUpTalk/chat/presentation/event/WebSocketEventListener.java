@@ -79,9 +79,7 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleWebSocketDisconnectListner(SessionDisconnectEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String email = accessor.getUser().getName();
-        log.info("{} 사용자 연결 끊김",email);
+        log.info("{} 사용자 연결 끊김",event.getSessionId());
     }
 
     private StompHeaderAccessor getStompHeaderAccessor(SessionConnectEvent event){

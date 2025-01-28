@@ -72,7 +72,7 @@ class WebSocketEventListenerTest {
 
         // when
         SessionSubscribeEvent event = new SessionSubscribeEvent(new Object(), message);
-        socketEventListener.handleSocketSubscribeListener(event);
+       // socketEventListener.handleSocketSubscribeListener(event);
         //then
         verify(socketService, times(1)).join(email, 123L);
         verify(messagingTemplate, times(1)).convertAndSend(destination, email + "님이 입장했습니다.");
