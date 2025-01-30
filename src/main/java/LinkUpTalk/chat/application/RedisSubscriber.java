@@ -1,5 +1,6 @@
 package LinkUpTalk.chat.application;
 
+import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,19 +25,30 @@ public class RedisSubscriber implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        log.info("Call Redis Subscriber");
-        //todo : Serialize만들기
-        //todo : message type별 나눔
-        String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
         try {
+            String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
+            log.info("Received message:{}", publishMessage);
+
             ChatMessageReqDto roomMessage = objectMapper.readValue(publishMessage, ChatMessageReqDto.class);
-            messageTemplate.convertAndSend("/topic/room/"+roomMessage.getDestination(),
-                    ChatMessageResDto.builder()
-                            .content(roomMessage.getContent())
-                            .messageType(roomMessage.getMessageType())
-                            .sender(roomMessage.getSender())
-                            .build());
+
+            if (roomMessage.getMessageType() == MessageType.DM_CHAT) {
+                messageTemplate.convertAndSendToUser((String) roomMessage.getDestination(),"/queue/chat",
+                        ChatMessageResDto.builder()
+                                .content(roomMessage.getContent())
+                                .messageType(roomMessage.getMessageType())
+                                .sender(roomMessage.getSender())
+                                .build());
+            } else{
+                messageTemplate.convertAndSend("/topic/chat/group/" + roomMessage.getDestination(),
+                        ChatMessageResDto.builder()
+                                .content(roomMessage.getContent())
+                                .messageType(roomMessage.getMessageType())
+                                .sender(roomMessage.getSender())
+                                .build());
+            }
+
         } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }

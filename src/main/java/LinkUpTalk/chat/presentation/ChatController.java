@@ -1,7 +1,7 @@
 package LinkUpTalk.chat.presentation;
 
 import LinkUpTalk.chat.application.ChatService;
-import LinkUpTalk.chat.presentation.dto.ChatMessageDmReqDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,24 +23,23 @@ public class ChatController {
     private static final String CHANNEL_TOPIC = "chatroom";
 
 
-    //todo : dto 클래스 만들기
-    @MessageMapping(value = "/chat/room/{roomId}")
+    @MessageMapping(value = "/chat/group/{roomId}")
     public void message(@Payload String message,
                         @DestinationVariable Long roomId,
                         Principal principal) {
-        log.info("webSocket Send : {} 사용자가 {}채팅방에 메시지를 전송",principal.getName(),roomId);
+        log.info("webSocket Send : {} 사용자가 {}그룹 채팅방에 메시지를 전송",principal.getName(),roomId);
 
-        ChatMessageReqDto roomMessage = chatService.saveMessage(principal.getName(), roomId, message);
-
-        redisTemplate.convertAndSend(CHANNEL_TOPIC, roomMessage);
+        ChatMessageReqDto groupMessage = chatService.saveGroupMessage(principal.getName(), roomId, message);
+        redisTemplate.convertAndSend(CHANNEL_TOPIC,groupMessage);
     }
 
-    /*//todo : 401 인증실패, 404 인가 실패
-    //todo : 1:1 채팅
-    @MessageMapping("/private")
-    public void sendSpecific(ChatMessageDto message, @Header("simpSessionAttributes") Map<String, Object> sessionAttributes) {
-        String sender=(String)sessionAttributes.get("sender");
-        log.info(sender+"to "+message.getDestinationUser()+"chatting....");
-        template.convertAndSendToUser(message.getDestinationUser(), "/queue/message", message.getMessage());
-    }*/
+    @MessageMapping("/chat/dm/{roomId}")
+    public void sendSpecific(@Payload ChatMessageDmSendReqDto req,
+                             @DestinationVariable Long roomId,
+                             Principal principal) {
+        log.info("webSocket Send : {} 사용자가 {}개인 채팅방에 메시지를 전송",principal.getName(),roomId);
+
+        ChatMessageReqDto dmMessage=chatService.saveDmMessage(principal.getName(),roomId,req);
+        redisTemplate.convertAndSend(CHANNEL_TOPIC, dmMessage);
+    }
 }

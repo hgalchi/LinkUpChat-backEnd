@@ -55,6 +55,13 @@ public class ChatRoom extends BaseEntity {
                 .build();
     }
 
+    public static ChatRoom of() {
+        return ChatRoom.builder()
+                .capacity(2)
+                .chatRoomType(ChatRoomType.DM)
+                .build();
+    }
+
     public ChatroomGetResDto toDto(){
         return ChatroomGetResDto.builder()
                 .id(id)

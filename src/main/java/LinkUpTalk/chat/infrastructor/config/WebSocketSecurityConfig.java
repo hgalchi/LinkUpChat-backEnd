@@ -16,11 +16,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSocketSecurity
 public class WebSocketSecurityConfig {
 
+    //todo : websocket security error Message 추가
     @Bean
     AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
                 .nullDestMatcher().permitAll()//CONNECT,HEARTBEAT 등은 permitAll()로 열어둔다.
-                .simpSubscribeDestMatchers("/topic/chat/**", "/user/queue/**").authenticated()
+                .simpSubscribeDestMatchers("/topic/chat/group/**", "/user/queue/**").authenticated()
                 .simpDestMatchers("/pub/**").authenticated() //사용자가 웹을 통해 브로드캐스팅
                 .simpTypeMatchers(SimpMessageType.MESSAGE).denyAll()// 사용자가 브로드캐스팅을 못하게함.
                 .anyMessage().denyAll();

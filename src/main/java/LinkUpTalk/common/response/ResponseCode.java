@@ -32,9 +32,8 @@ public enum ResponseCode {
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "가입된 사용자 입니다."),
 
 
-    CHATROOM_USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 방에 있는 사용자입니다."),
     CHATROOM_USER_NOT_FOUND_IN(HttpStatus.NOT_FOUND, "해당 유저를 채팅방에서 찾을 수 없습니다."),
-
+    CHATROOM_EXCEEDED(HttpStatus.CONFLICT, "채팅방이 인원이 초과되었습니다."),
     STOMP_NOT_FOUND_DESTINATION(HttpStatus.NOT_FOUND, "목적지를 찾을 수 없습니다."),
 
     //500
@@ -48,6 +47,8 @@ public enum ResponseCode {
     CHATROOM_CREATE(HttpStatus.OK, "채팅방 생성 성공"),
     CHATROOM_READ(HttpStatus.OK,"채팅방 단일 조회 성공"),
     CHATROOM_LIST_READ(HttpStatus.OK,"채팅방 리스트 조회 성공"),
+    CHATROOM_MESSAGE_HISTORY_READ(HttpStatus.OK,"채팅방 메시지 내역 조회 성공"),
+    CHATROOM_PARTICIPANTS_READ(HttpStatus.OK,"채팅방 유저 조회 성공"),
     CHATROOM_UPDATE(HttpStatus.OK,"채팅방 수정 성공"),
     CHATROOM_DELETE(HttpStatus.OK,"채팅방 삭제 성공");
 

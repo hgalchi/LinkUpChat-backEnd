@@ -6,7 +6,7 @@ import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.domain.repository.ChatMessageRepository;
 import LinkUpTalk.chat.domain.repository.ChatRoomRepository;
 import LinkUpTalk.chat.domain.repository.ChatRoomDetailRepository;
-import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.chat.presentation.dto.*;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.chat.domain.ChatMessage;
 import LinkUpTalk.chat.domain.ChatRoom;
@@ -31,72 +31,68 @@ public class ChatService {
 
     @Transactional
     public ChatMessageReqDto join(String email, Long roomId) {
+        User user = findUserByEmail(email);
         ChatRoom chatRoom = findChatRoom(roomId);
-        User user = findUser(email);
 
-        checkIfUserExists(chatRoom, user);
-        checkRoomCapacity(chatRoom);
+        if(!isUserExistsInChatRoom(chatRoom, user)){
+            checkRoomCapacity(chatRoom);
 
-        ChatRoomDetail chatroomDetail = ChatRoomDetail.of(chatRoom, user, ChatRoomRoleType.MEMBER);
-        chatRoom.addUser(chatroomDetail);
-        return ChatMessage.of(user.getName(), roomId,
-                        user.getName() + "님이 입장했습니다.",
+            ChatRoomDetail chatroomDetail = ChatRoomDetail.of(chatRoom, user, ChatRoomRoleType.MEMBER);
+            chatRoom.addUser(chatroomDetail);
+        }
+
+        return ChatMessage.of(user.getName(),roomId,
+                        user.getName() + " 님이 입장했습니다.",
                         MessageType.JOIN)
                 .toChatMessageReqDto();
 
     }
 
-    //사용자가 방에서 나감.
+    //메세지 저장
     @Transactional
-    public void leave(String email,Long roomId) {
-        User user = findUser(email);
-        ChatRoom chatRoom = findChatRoom(roomId);
-        ChatRoomDetail leavingUser = findLeavingUser(chatRoom, user);
-
-        chatRoom.removeUser(leavingUser);
-    }
-
-    //메세지 전송
-    @Transactional
-    public ChatMessageReqDto saveMessage(String email, Long roomId, String content) {
-        User user = findUser(email);
+    public ChatMessageReqDto saveGroupMessage(String email, Long roomId, String content) {
+        User user = findUserByEmail(email);
         ChatRoom chatRoom= findChatRoom(roomId);
-        ChatMessage chatMessage = ChatMessage.of(user.getName(), roomId, content, MessageType.CHAT);
+        ChatMessage chatMessage = ChatMessage.of(user.getName(), roomId, content, MessageType.GROUP_CHAT);
 
         chatMessageRepository.save(chatMessage);
         return chatMessage.toChatMessageReqDto();
     }
 
+    // todo : fetch 전략 수정을 생각해보기
+    @Transactional
+    public ChatMessageReqDto saveDmMessage(String email,Long roomId, ChatMessageDmSendReqDto dto) {
+        User user = findUserByEmail(email);
+        ChatRoom chatRoom = findChatRoom(roomId);
+        User receiver = findUser(dto.getReceiverId());
+        ChatMessage chatMessage = ChatMessage.of(user.getName(), roomId, dto.getContent(), MessageType.DM_CHAT);
+
+        chatMessageRepository.save(chatMessage);
+        return chatMessage.toChatMessageReqDto(receiver.getEmail());
+    }
+
     //todo : race condition 생각하기
     private void checkRoomCapacity(ChatRoom chatroom) {
         if (chatroom.getCapacity() <= chatroom.getParticipantCount()) {
-            throw new MessageDeliveryException("현재 채팅방 인원이 초과되었습니다.");
+            throw new BusinessException(ResponseCode.CHATROOM_EXCEEDED);
         }
     }
 
-    private void checkIfUserExists(ChatRoom chatRoom,User user){
-        chatroomDetailRepository.findByChatRoom(chatRoom).stream()
-                .filter(userChatRoom -> userChatRoom.getUser() == user)
-                .findAny()
-                .ifPresent(userChatroom -> {
-                    log.info("이미 채팅룸에 존재하는 회원임");
-                    //이미 채팅룸에 존재하는 회원임
-                    return;
-                });
+    private boolean isUserExistsInChatRoom(ChatRoom chatRoom, User user){
+        return chatroomDetailRepository.findByChatRoom(chatRoom).stream()
+                .anyMatch(chatRoomDetail -> chatRoomDetail.getUser() == user);
     }
 
     private ChatRoom findChatRoom(Long roomId){
         return chatRoomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ResponseCode.CHATROOM_NOT_FOUND));
     }
 
-    private User findUser(String email) {
+    private User findUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
+    }
+
+    private User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
     }
 
-    private ChatRoomDetail findLeavingUser (ChatRoom chatRoom, User user) {
-        return chatRoom.getParticipants().stream()
-                .filter(userChatRoom -> userChatRoom.getUser() == user)
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ResponseCode.CHATROOM_USER_NOT_FOUND_IN));
-    }
 }

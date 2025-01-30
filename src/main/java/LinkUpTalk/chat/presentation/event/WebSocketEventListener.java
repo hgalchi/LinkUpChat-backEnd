@@ -19,7 +19,6 @@ import org.springframework.web.socket.messaging.*;
 import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
-// todo : 채팅방 데이터는 sql 채팅 메시지는 noSql
 // evnetListeneer-> controller로 변경할지 생각해보기
 
 @Component
@@ -49,32 +48,20 @@ public class WebSocketEventListener {
             String destination = getDestination(accessor);
             log.info("{} 사용자 {} 채팅방 구독", email, destination);
 
-            if(destination.startsWith("/topic/room/")) {
+            if(destination.startsWith("/topic/chat/group")) {
                 Long roomId = parseRoomId(destination);
                 ChatMessageReqDto message=socketService.join(email, roomId);
                 redisTemplate.convertAndSend(CHANNEL_TOPIC, message);
             //todo : event 비동기 처리 exception
             }
         }catch (BusinessException ex) {
-            log.error("Subscribe Exception Cause: {}", ex.getMessage());
+            log.error("[subscribe] Exception Cause: {}", ex.getMessage());
             ChatMessageResDto res = ChatMessageResDto.builder()
                     .content(ex.getMessage())
                     .messageType(MessageType.ERROR)
                     .build();
             messageTemplate.convertAndSendToUser(email, "/queue/errors",res);
         }
-    }
-
-    @EventListener
-    public void handleUnSubscribeEvent(SessionUnsubscribeEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String email = accessor.getUser().getName();
-        Long roomId = parseRoomId(getDestination(accessor));
-
-        socketService.leave(email, roomId);
-
-        //todo : 세션 처리 필요함.
-        log.info("{}사용자 {} 채팅방을 퇴장",email,roomId);
     }
 
     @EventListener
@@ -97,7 +84,7 @@ public class WebSocketEventListener {
     }
 
     private Long parseRoomId(String destination) {
-        return Long.parseLong(destination.split("/")[3]);
+        return Long.parseLong(destination.split("/")[4]);
     }
 
 }

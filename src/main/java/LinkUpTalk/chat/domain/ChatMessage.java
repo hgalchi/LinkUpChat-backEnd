@@ -2,6 +2,7 @@ package LinkUpTalk.chat.domain;
 
 import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
 import LinkUpTalk.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,11 +10,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
-@Document(collection="chat_content")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+@Document(collection="chat_content")
 public class ChatMessage extends BaseEntity {
 
     @Id
@@ -39,9 +40,9 @@ public class ChatMessage extends BaseEntity {
     public ChatMessageReqDto toChatMessageReqDto() {
         return ChatMessageReqDto.builder()
                 .sender(sender)
+                .destination(roomId)
                 .content(content)
                 .messageType(messageType)
-                .destination(roomId)
                 .build();
     }
 
@@ -51,6 +52,14 @@ public class ChatMessage extends BaseEntity {
                 .content(content)
                 .messageType(messageType)
                 .destination(receiver)
+                .build();
+    }
+
+    public ChatMessageResDto toChatMessageResDto() {
+        return ChatMessageResDto.builder()
+                .sender(sender)
+                .content(content)
+                .messageType(messageType)
                 .build();
     }
 
