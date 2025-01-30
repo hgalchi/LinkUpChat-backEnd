@@ -1,8 +1,11 @@
 package LinkUpTalk.auth.infrastructor;
 
-public interface JpaRefreshRepository {
+import LinkUpTalk.auth.domain.Refresh;
+import LinkUpTalk.auth.domain.Repository.RefreshRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-    Boolean existsByRefresh(String refresh);
+@Repository
+public interface JpaRefreshRepository extends JpaRepository<Refresh, Long>, RefreshRepository {
 
-    void deleteByRefresh(String refresh);
 }

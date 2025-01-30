@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.infrastructor;
+package LinkUpTalk.chat.infrastructor.jpa;
 
 import LinkUpTalk.chat.domain.repository.ChatRoomDetailRepository;
 import LinkUpTalk.chat.domain.ChatRoomDetail;
