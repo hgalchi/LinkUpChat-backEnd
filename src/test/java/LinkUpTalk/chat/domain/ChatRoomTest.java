@@ -1,5 +1,6 @@
 package LinkUpTalk.chat.domain;
 
+import LinkUpTalk.chat.domain.constant.ChatRoomType;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ class ChatRoomTest {
 
     @BeforeEach
     void setUp(){
-        chatRoom = ChatRoom.of("test room", 10);
+        chatRoom = ChatRoom.of("test room", 10, ChatRoomType.GROUP);
     }
 
     @Test

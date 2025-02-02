@@ -35,7 +35,7 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
     }
 
     private Message<byte[]> errorMessage(ResponseCode code) {
-        log.error("Connect Exception cause : {}", code.getMessage());
+        log.error("[connect] Exception cause : {}", code.getMessage());
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
         accessor.setMessage(String.valueOf(code.getStatus()));

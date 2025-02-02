@@ -40,6 +40,7 @@ public class ChatRoom extends BaseEntity {
     private boolean deleted=false;
 
     @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private ChatRoomType chatRoomType;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY,

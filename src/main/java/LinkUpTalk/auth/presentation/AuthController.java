@@ -41,8 +41,8 @@ public class AuthController {
     /**
      * 사용자 탈퇴
      */
-    @PreAuthorize("hasRole('ADMIN') or @resourceAuthService.isUserOwner(authentication, #userId)")
-    @DeleteMapping("/signOut")
+    @PreAuthorize("hasRole('ADMIN') or @userResourceAuthService.isResourceOwner(authentication, #userId)")
+    @DeleteMapping("/signOut/{userId}")
     public ResponseEntity<ResponseCode> delete(@PathVariable Long userId) {
         userService.delete(userId);
         return ResponseEntity.ok(ResponseCode.STATE_SUC);

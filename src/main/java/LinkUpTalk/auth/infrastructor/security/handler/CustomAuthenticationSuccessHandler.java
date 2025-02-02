@@ -40,12 +40,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
     }
 
-    /**
-     * RefreshToken과 AccessToken을 header와 cookie값으로 전송
-     * @param response
-     * @param authentication
-     * @throws IllegalAccessException
-     */
     protected void handle(HttpServletResponse response, Authentication authentication) throws IllegalAccessException {
 
         String email = authentication.getName();
@@ -68,23 +62,4 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
     }
-
-    //권한에 따른 redirect 페이지
-   /* protected String determineTargetUrl(Authentication authentication) throws IllegalAccessException {
-
-        Map<String, String> roleTargetUrlMap = new HashMap<String, String>();
-        roleTargetUrlMap.put("ROLE_ADMIN", "/admin");
-        roleTargetUrlMap.put("ROLE_CUSTOMER", "/customerHome");
-
-        Collection<? extends GrantedAuthority> authorities =
-                authentication.getAuthorities();
-        for (GrantedAuthority grantedAuthority : authorities) {
-            String authorityName = grantedAuthority.getAuthority();
-            if (roleTargetUrlMap.containsKey(authorityName)) {
-                return roleTargetUrlMap.get(authorityName);
-            }
-        }
-        throw new IllegalAccessException();
-    }*/
-
 }
