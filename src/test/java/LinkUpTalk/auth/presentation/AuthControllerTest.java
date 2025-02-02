@@ -20,7 +20,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class AuthControllerTest {
 
     private MockMvc mvc;
@@ -157,23 +160,22 @@ class AuthControllerTest {
 
         //when & then
         mvc.perform(formLogin().user(EMAIL+"Wrong").password(PASSWORD))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
 
 
     }
     @Test
     @Tag("signOut")
     @DisplayName("사용자 탈퇴")
-    @WithUserDetails(value=EMAIL,userDetailsServiceBeanName = "customUserDetailService", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    public void deleteUser_succ() throws Exception {
+    @WithMockUser(username=EMAIL,roles = "CUSTOMER")
+    public void deleteUser_suc() throws Exception {
         //given
-        Long userId = user.getId();
+        User user=testUtil.registerUser();
 
         //when
-        mvc.perform(delete("/users/{userId}", userId))
+        mvc.perform(delete("/auth/signOut/{userId}", user.getId()))
                 .andExpect(status().isOk());
-
-        User deleteUser = userRepository.findById(userId).orElse(null);
+        User deleteUser = userRepository.findById(user.getId()).orElse(null);
         //then
         Assertions.assertThat(deleteUser).isNotNull();
         Assertions.assertThat(deleteUser.isDeleted()).isTrue();
@@ -181,7 +183,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("액세스 토큰 재발급 성공")
-    public void issueRefresh_success() throws Exception {
+    public void issueRefresh_suc() throws Exception {
         // given
         User user = testUtil.registerUser();
         String refreshToken = registerRefresh(user);
@@ -218,7 +220,7 @@ class AuthControllerTest {
         String refreshToken = jwtUtil.createToken(EMAIL, Collections.singletonList("ROLE_USER"), TokenType.refreshToken.name());
 
         Refresh refresh = Refresh.builder()
-                .refresh(refreshToken)
+                .refresh(jwtUtil.resolveToken(refreshToken))
                 .expiration(jwtUtil.getRefreshExpireTime())
                 .user(user)
                 .build();

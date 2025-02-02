@@ -90,6 +90,7 @@ public class JwtUtil {
                 .filter(cookie -> cookie.getName().equals(TokenType.refreshToken.name()))
                 .findFirst()
                 .map(Cookie::getValue)
+                .map(this::resolveToken)
                 .orElseThrow(() -> new BusinessException(ResponseCode.TOKEN_NOT_EXIST));
     }
 

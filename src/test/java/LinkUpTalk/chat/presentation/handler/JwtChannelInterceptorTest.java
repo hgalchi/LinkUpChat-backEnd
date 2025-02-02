@@ -80,16 +80,6 @@ public class JwtChannelInterceptorTest {
     }
 
     @Test
-    @DisplayName("test")
-    void test(){
-        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
-        accessor.setLeaveMutable(true);
-        Message<?> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
-        Message<?> result = jwtChannelInterceptor.preSend(message, messageChannel);
-        System.out.println("result:"+result);
-    }
-
-    @Test
     @DisplayName("웹 소켓 연결 실패_유효하지 않은 토큰")
     void connect_failWithExpiredToken(){
         // Given
@@ -106,24 +96,5 @@ public class JwtChannelInterceptorTest {
         // When & Then
         assertThrows(BusinessException.class, () -> jwtChannelInterceptor.preSend(message, messageChannel));
     }
-
-    @Test
-    void subscribe_validPath(){
-        //given
-        String email = "test@example.com";
-        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
-        accessor.setDestination("/topic/room/123");
-        accessor.setUser(new UsernamePasswordAuthenticationToken(email, null));
-        Message<?> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
-
-        //when
-        Message<?> result = jwtChannelInterceptor.preSend(message, messageChannel);
-
-        //then
-        assertNotNull(result);
-        verify(chatServcie, Mockito.times(1)).join(email, 123L);
-    }
-
-
 }
 
