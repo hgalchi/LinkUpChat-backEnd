@@ -24,8 +24,8 @@ public class WebSocketGlobalExceptionHandler {
     private final SimpMessagingTemplate template;
 
     @MessageExceptionHandler(BusinessException.class)
-    public void handleBusinessException(Principal principal, @Payload String destination, BusinessException ex) {
-        log.info("Send Exception cause :{}", ex.getMessage());
+    public void handleBusinessException(Principal principal, BusinessException ex) {
+        log.info("[send] Exception cause :{}", ex.getMessage());
 
         ChatMessageResDto res = ChatMessageResDto.builder()
                 .content(ex.getMessage())

@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.presentation;
+package LinkUpTalk.chat.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

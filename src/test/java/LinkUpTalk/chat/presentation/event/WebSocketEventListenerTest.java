@@ -24,7 +24,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @SpringBootTest
 class WebSocketEventListenerTest {
 
-    @Spy // ✅ 실제 객체를 감싸서 스파이 객체로 변경
+    @Spy
     @InjectMocks
     private WebSocketEventListener socketEventListener;
 
@@ -40,6 +40,7 @@ class WebSocketEventListenerTest {
         // given
         String email = "test@naver.com";
         String sessionId = "test-session-123";
+
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
         accessor.setUser(new UsernamePasswordAuthenticationToken(email, null));
         accessor.setSessionId(sessionId);
@@ -59,7 +60,8 @@ class WebSocketEventListenerTest {
         // given
         String email = "test@naver.com";
         String sessionId = "test-session-123";
-        String destination = "/sub/room/123";
+        String destination = "/topic/chat/room/group/123";
+
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(new UsernamePasswordAuthenticationToken(email, null));
         accessor.setSessionId(sessionId);

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -38,8 +39,8 @@ class ChatRoomServiceTest {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("채팅방 생성할 수 있다.")
-    void createChatRoom_suc() {
+    @DisplayName("그룹 채팅방 생성")
+    void createGroupChatRoom_suc() {
         //given
         ChatRoomCreateReqDto dto = ChatRoomCreateReqDto.builder()
                 .name("testRoom")
@@ -48,18 +49,30 @@ class ChatRoomServiceTest {
                 .build();
 
         User user = User.builder().id(1L).build();
-        ChatRoom chatRoom = ChatRoom.builder().id(1L).name("testRoom").capacity(10).build();
-        ChatRoomDetail detail = ChatRoomDetail.builder().chatRoom(chatRoom).user(user).role(ChatRoomRoleType.HOST).build();
-        chatRoom.addUser(detail);
-
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        //when
-        chatRoomService.create(dto);
 
-        //then
+        //when & then
+        assertDoesNotThrow(()->chatRoomService.createGroup(dto));
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
+    @Test
+    @DisplayName("개인 채팅방 생성")
+    void createDmChatRoom_suc(){
+        //given
+        Long receiverId = 2L;
+        String email = "user@naver.com";
+
+        User sender = User.builder().id(1L).build();
+        User receiver = User.builder().id(receiverId).build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(sender));
+        when(userRepository.findById(receiverId)).thenReturn(Optional.of(receiver));
+
+        //when &then
+        assertDoesNotThrow(() -> chatRoomService.createDm(receiverId, email));
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
+    }
     @Test
     @DisplayName("채팅방 식별자로 채팅방을 조회할 수 있다.")
     void getChatRoom_suc() {
@@ -79,7 +92,7 @@ class ChatRoomServiceTest {
 
     @Test
     @DisplayName("채팅방 수정 성공")
-    void modifyChatRoom_suc(){
+    void modifyChatRoom_suc() {
         //given
         ChatRoom chatRoom = ChatRoom.builder().id(1L).name("testRoom").capacity(10).build();
         String modifyChatRoomName = "Modify test chatRoom";
