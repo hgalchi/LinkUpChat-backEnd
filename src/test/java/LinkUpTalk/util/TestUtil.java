@@ -48,16 +48,6 @@ public class TestUtil {
         return user;
     }
 
-    public void registerGroupChatRoom() {
-        ChatRoom chatroom=ChatRoom.builder().chatRoomType(ChatRoomType.GROUP).name("test group chatroom").capacity(100).build();
-        chatRoomRepository.save(chatroom);
-    }
-
-    public void registerDmChatRoom(){
-        ChatRoom chatroom=ChatRoom.builder().chatRoomType(ChatRoomType.GROUP).name("test direct chatroom").capacity(2).build();
-        chatRoomRepository.save(chatroom);
-    }
-
     public User registerUsers(String email,String name){
         Roles role = groupRepository.findByCode(RoleType.CUSTOMER.getRole()).get();
         User user = User.of(name, PASSWORD, email);
@@ -72,11 +62,12 @@ public class TestUtil {
         return jwtUtil.createToken(email,List.of(), TokenType.accessToken.name());
     }
 
-    public ChatRoom registerGroupChatRoom(String name, int capacity, ChatRoomType chatRoomType) {
-        return ChatRoom.builder()
+    public ChatRoom registerChatRoom(String name, int capacity, ChatRoomType chatRoomType) {
+        ChatRoom chatRoom=ChatRoom.builder()
                 .name(name)
                 .capacity(capacity)
                 .chatRoomType(chatRoomType)
                 .build();
+        return chatRoomRepository.save(chatRoom);
     }
 }
