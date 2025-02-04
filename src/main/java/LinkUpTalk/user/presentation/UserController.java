@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-
-    //todo : 커스텀 어노테이션으로 변경
     /**
      * 사용자 단건 조회 : 코드 키 값을 기반으로 조회
      */

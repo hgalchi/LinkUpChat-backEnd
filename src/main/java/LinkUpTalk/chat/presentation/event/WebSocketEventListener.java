@@ -78,7 +78,6 @@ public class WebSocketEventListener {
                 .orElseThrow(() -> new BusinessException(ResponseCode.STOMP_NOT_FOUND_DESTINATION));
     }
 
-    //todo : of와 ofnullable 비교
     private String getEmail(StompHeaderAccessor accessor) {
         return accessor.getUser().getName();
     }

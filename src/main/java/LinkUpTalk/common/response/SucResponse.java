@@ -15,7 +15,6 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SucResponse<T> {
 
-    //todo : code값을 따로 보내기
     private T data;
     private String message;
 
