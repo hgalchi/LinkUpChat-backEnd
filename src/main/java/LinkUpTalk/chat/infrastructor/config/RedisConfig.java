@@ -21,19 +21,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableCaching
 public class RedisConfig {
 
+    @Value("${spring.redis.host}")
+    public String host;
 
-    //todo : jwt도 그렇고 왜 value안됌?
-   /* @Value("${spring.data.redis.host}")
-    private String host;
-
-    @Value("${spring.data.redis.port}")
-    private String port;*/
+    @Value("${spring.redis.port}")
+    public String port;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName("localhost");
-        redisStandaloneConfiguration.setPort(Integer.parseInt("6380"));
+        redisStandaloneConfiguration.setHostName(host);
+        redisStandaloneConfiguration.setPort(Integer.parseInt(port));
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);
         return lettuceConnectionFactory;
     }
