@@ -5,11 +5,11 @@ services:
     container_name: postgres-total
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - 5432:5432
     environment:
-      - POSTGRES_DB=chatting-total
-      - POSTGRES_USER=chatUser
-      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=${{secrets.POSTGRES_DB}}
+      - POSTGRES_USER=${{secrets.POSTGRES_USER}}
+      - POSTGRES_PASSWORD=${{secrets.POSTGRES_PASSWORD}}
       - TZ=Asia/Seoul
     volumes:
       - "./init/:/docker-entrypoint-initdb.d"
@@ -20,8 +20,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=chatUser    # 인증계정 username
-      - MONGO_INITDB_ROOT_PASSWORD=chatDb1234    # 인증계정 pwd
+      - MONGO_INITDB_ROOT_USERNAME=${{secrets.MONGO_USERNAME}}
+      - MONGO_INITDB_ROOT_PASSWORD=${{secrets.MONGO_PASSWORD}}
 
   redis:
     image: redis:latest
