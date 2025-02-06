@@ -48,7 +48,7 @@ dependencies {
 	//websocket-security
 	implementation 'org.springframework.security:spring-security-messaging:6.1.2'
 
-	// postgresql
+	// postgres
 	implementation 'org.postgresql:postgresql:42.6.0'
 
 	// mongo
@@ -59,11 +59,20 @@ dependencies {
 
 	//test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.mockito:mockito-core:5.8.0'
 	testImplementation 'org.springframework:spring-test:6.1.0'
+	testImplementation 'org.mockito:mockito-core:5.8.0'
+
+	testImplementation 'org.springframework.security:spring-security-test'
+
 	testImplementation group: 'com.h2database', name: 'h2', version: '2.1.214'
+
+	implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
+
+	implementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo.spring3x', version: '4.18.0'
+
+
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
