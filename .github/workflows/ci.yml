@@ -33,9 +33,6 @@ jobs:
       - name: Grant execute permissions to gradlew
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle # application 빌드
-        run: ./gradlew clean build
-
       - name: Create .env.properties file # 환경설정 주입
         run: |
           cat > .env.properties <<EOF
@@ -53,5 +50,7 @@ jobs:
           EOF
         shell: bash
 
+      - name: Build with Gradle # application 빌드
+        run: ./gradlew clean build
 
 
