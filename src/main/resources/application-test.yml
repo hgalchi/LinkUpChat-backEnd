@@ -9,7 +9,7 @@ spring:
     port: 54322
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     defer-datasource-initialization: true
     show-sql: true
     properties:
