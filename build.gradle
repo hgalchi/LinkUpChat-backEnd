@@ -73,6 +73,10 @@ dependencies {
 
 }
 
+test {
+	systemProperty 'logging.level.de.flapdoodle.embed.mongo', 'DEBUG'
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
