@@ -25,12 +25,6 @@ de:
 
 logging:
   level:
-    org:
-      springframework:
-        jdbc:
-          datasource:
-            init: DEBUG
-        test:
-          context:
-            jdb: DEBUG
-
+    de.flapdoodle.embed.mongo: DEBUG
+    org.springframework.data.redis: DEBUG
+    redis.embedded: DEBUG
