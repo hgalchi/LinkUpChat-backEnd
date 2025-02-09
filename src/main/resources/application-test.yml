@@ -28,3 +28,10 @@ logging:
     de.flapdoodle.embed.mongo: DEBUG
     org.springframework.data.redis: DEBUG
     redis.embedded: DEBUG
+    com:
+      mongodb=DEBUG:
+    org.springframework: DEBUG
+    org.springframework.beans.factory: DEBUG
+    org.springframework.context.annotation: DEBUG
+    org.springframework.context: DEBUG
+    org.springframework.web: DEBUG
