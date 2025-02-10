@@ -42,10 +42,7 @@ jobs:
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          MONGO_PORT=${{ secrets.MONGO_PORT }}
-          MONGO_DB=${{ secrets.MONGO_DB }}
-          MONGO_USERNAME=${{ secrets.MONGO_USERNAME }}
-          MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+          MONGO_URI=${{secrets.MONGO_URI}}
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           EOF
         shell: bash

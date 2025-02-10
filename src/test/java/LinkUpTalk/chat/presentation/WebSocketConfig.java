@@ -1,21 +1,19 @@
 package LinkUpTalk.chat.presentation;
 
-import LinkUpTalk.chat.domain.ChatRoom;
-import LinkUpTalk.chat.domain.constant.ChatRoomType;
+import LinkUpTalk.chat.config.IntegrationConfig;
 import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
-import LinkUpTalk.user.domain.repository.UserRepository;
 import LinkUpTalk.util.TestUtil;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -30,9 +28,10 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@AutoConfigureDataMongo
 @ActiveProfiles("test")
 @Sql(scripts = "/websocket-test-data.sql", executionPhase = BEFORE_TEST_CLASS)
-class WebSocketTest {
+class WebSocketConfig extends IntegrationConfig {
 
     @LocalServerPort
     private int port;
@@ -49,7 +48,7 @@ class WebSocketTest {
     private static final String RECEIVER_NAME = "receiver";
     private static final String PRODUCER_EMAIL = "producer@naver.com";
     private static final String RECEIVER_EMAIL = "receiver@naver.com";
-    private static final Long GROUP_CHATROOM_ID=1L;
+    private static final Long GROUP_CHATROOM_ID = 1L;
     private static final Long DM_CHATROOM_ID = 2L;
     private static final Long RECEIVER_ID = 2L;
 
@@ -57,7 +56,7 @@ class WebSocketTest {
     void setup() {
         url = "ws://localhost:" + port + "/stomp";
 
-        stompClient = new WebSocketStompClient( new StandardWebSocketClient());
+        stompClient = new WebSocketStompClient(new StandardWebSocketClient());
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
         producerValidToken = testUtil.getToken(PRODUCER_EMAIL);
@@ -107,7 +106,7 @@ class WebSocketTest {
         // When
         subScribeToTopic(producerSession, subDestination, messageQueue1);
         Thread.sleep(500);
-        subScribeToTopic(receiverSession,subDestination,messageQueue2);
+        subScribeToTopic(receiverSession, subDestination, messageQueue2);
 
         ChatMessageResDto res1 = messageQueue1.poll(3, TimeUnit.SECONDS);
         ChatMessageResDto res2 = messageQueue2.poll(3, TimeUnit.SECONDS);
@@ -123,7 +122,6 @@ class WebSocketTest {
         assertThat(res2.getSender()).isEqualTo(expected2.getSender());
         assertThat(res2.getMessageType()).isEqualTo(expected2.getMessageType());
     }
-
 
 
     @Test
@@ -145,19 +143,19 @@ class WebSocketTest {
         BlockingDeque<ChatMessageResDto> messageQueue1 = new LinkedBlockingDeque<>();
         BlockingDeque<ChatMessageResDto> messageQueue2 = new LinkedBlockingDeque<>();
 
-        String subDestination = "/topic/chat/group/"+GROUP_CHATROOM_ID;
+        String subDestination = "/topic/chat/group/" + GROUP_CHATROOM_ID;
 
         //topic 구독
         subScribeToTopic(session1, subDestination, messageQueue1);
-        subScribeToTopic(session2,subDestination,messageQueue2);
+        subScribeToTopic(session2, subDestination, messageQueue2);
 
         // When
-        session1.send("/pub/chat/group/"+GROUP_CHATROOM_ID, "hi");
+        session1.send("/pub/chat/group/" + GROUP_CHATROOM_ID, "hi");
 
-        System.out.println("입장 메시지 :"+messageQueue2.take());
-        System.out.println("입장 메시지 :"+messageQueue2.take());
+        System.out.println("입장 메시지 :" + messageQueue2.take());
+        System.out.println("입장 메시지 :" + messageQueue2.take());
         ChatMessageResDto res = messageQueue2.take();
-        System.out.println("응답 메시지 :"+res);
+        System.out.println("응답 메시지 :" + res);
 
         // Then
         assertThat(res.getSender()).isEqualTo(PRODUCER_NAME);
@@ -191,13 +189,13 @@ class WebSocketTest {
         //topic 구독
         subScribeToTopic(session1, subDestination, messageQueue1);
         Thread.sleep(1000);
-        subScribeToTopic(session2,subDestination,messageQueue2);
+        subScribeToTopic(session2, subDestination, messageQueue2);
 
 
         // When
-        session1.send("/pub/chat/dm/"+DM_CHATROOM_ID, sendDmMessage);
+        session1.send("/pub/chat/dm/" + DM_CHATROOM_ID, sendDmMessage);
 
-        ChatMessageResDto res=messageQueue2.poll(3, TimeUnit.SECONDS);
+        ChatMessageResDto res = messageQueue2.poll(3, TimeUnit.SECONDS);
 
 
         assertThat(res.getSender()).isEqualTo(PRODUCER_NAME);
@@ -205,7 +203,7 @@ class WebSocketTest {
         assertThat(res.getMessageType()).isEqualTo(MessageType.DM_CHAT);
     }
 
-    private StompSession sessionConnect(String url,StompHeaders header) throws ExecutionException, InterruptedException, TimeoutException {
+    private StompSession sessionConnect(String url, StompHeaders header) throws ExecutionException, InterruptedException, TimeoutException {
         return stompClient.connect(url, new WebSocketHttpHeaders(), header, new StompSessionHandlerAdapter() {
         }).get(3, TimeUnit.SECONDS);
     }

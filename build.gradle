@@ -61,22 +61,25 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework:spring-test:6.1.0'
 	testImplementation 'org.mockito:mockito-core:5.8.0'
-
 	testImplementation 'org.springframework.security:spring-security-test'
 
-	testImplementation group: 'com.h2database', name: 'h2', version: '2.1.214'
+	//testContainers
+	testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+	testImplementation "org.testcontainers:junit-jupiter:1.20.5"
+	testImplementation "org.testcontainers:testcontainers:1.20.5"
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 
-	implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
+	//testContainer-postgres
+	testImplementation 'org.testcontainers:postgresql:1.20.4'
 
-	implementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo.spring3x', version: '4.18.0'
+	//testContainer-redis
+	implementation 'com.redis.testcontainers:testcontainers:1.15.3'
+
+	//testContainer-mongodb
+	testImplementation 'org.testcontainers:mongodb:1.20.4'
 
 
 }
-
-test {
-	systemProperty 'logging.level.de.flapdoodle.embed.mongo', 'DEBUG'
-}
-
 
 tasks.named('test') {
 	useJUnitPlatform()

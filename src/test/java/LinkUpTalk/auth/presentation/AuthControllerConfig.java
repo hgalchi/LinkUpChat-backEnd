@@ -1,6 +1,7 @@
 package LinkUpTalk.auth.presentation;
 
 import LinkUpTalk.auth.domain.Repository.RefreshRepository;
+import LinkUpTalk.chat.config.IntegrationConfig;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.auth.domain.Refresh;
 import LinkUpTalk.auth.domain.constant.TokenType;
@@ -11,17 +12,13 @@ import LinkUpTalk.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -40,11 +37,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "de.flapdoodle.mongodb.embedded.version=5.0.5")
 @Transactional
 @AutoConfigureMockMvc
+@AutoConfigureDataMongo
 @ActiveProfiles("test")
-class AuthControllerTest {
+class AuthControllerConfig extends IntegrationConfig {
 
     private MockMvc mvc;
 

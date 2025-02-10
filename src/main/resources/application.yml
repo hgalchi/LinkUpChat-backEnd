@@ -11,11 +11,7 @@ spring:
       driver-class-name: org.postgresql.Driver
   data:
     mongodb:
-      host: localhost
-      port: ${MONGO_PORT}
-      database: ${MONGO_DB}
-      username: ${MONGO_USERNAME}
-      password: ${MONGO_PASSWORD}
+      uri: ${MONGO_URL}
       authentication-database: admin
   jpa:
     defer-datasource-initialization: true
@@ -31,5 +27,5 @@ spring:
       mode: never
 
   redis:
-    host: localhost
+    host: ${REDIS_HOST}
     port: ${REDIS_PORT}
