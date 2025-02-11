@@ -1,13 +1,13 @@
-package LinkUpTalk.chat.presentation;
+package LinkUpTalk.chat;
 
-import LinkUpTalk.chat.config.IntegrationConfig;
+import LinkUpTalk.annotation.IntegrateTest;
+import LinkUpTalk.chat.config.IntegrationTest;
 import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
 import LinkUpTalk.util.TestUtil;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -27,11 +27,10 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureDataMongo
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @Sql(scripts = "/websocket-test-data.sql", executionPhase = BEFORE_TEST_CLASS)
-class WebSocketConfig extends IntegrationConfig {
+class WebSocketChatIntegrationTest extends IntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -63,8 +62,8 @@ class WebSocketConfig extends IntegrationConfig {
         receiverValidToken = testUtil.getToken(RECEIVER_EMAIL);
     }
 
-    @Test
-    @DisplayName("연결 성공")
+    @IntegrateTest
+    @DisplayName("WebSocket 연결 및 인증 성공")
     void connect_suc() throws ExecutionException, InterruptedException, TimeoutException {
         //given
         StompHeaders headers = new StompHeaders();
@@ -79,9 +78,8 @@ class WebSocketConfig extends IntegrationConfig {
     }
 
 
-    @Test
-    @Tag("webSocketSubscribe")
-    @DisplayName("구독 성공")
+    @IntegrateTest
+    @DisplayName("WebSocket 그룹 채팅방 구독 및 순차적인 입장 메시지 수신 성공")
     void subscribe_suc_sequentially() throws ExecutionException, InterruptedException, TimeoutException {
         // Given
         StompHeaders headers1 = new StompHeaders();
@@ -124,9 +122,8 @@ class WebSocketConfig extends IntegrationConfig {
     }
 
 
-    @Test
-    @Tag("webSocketSend")
-    @DisplayName("그룹 메시지 전송 성공")
+    @IntegrateTest
+    @DisplayName("WebSocket 그룹 채팅 메시지 전송 및 수신 성공")
     void groupChatSend_suc() throws InterruptedException, ExecutionException, TimeoutException {
         // Given
         StompHeaders headers1 = new StompHeaders();
@@ -155,7 +152,6 @@ class WebSocketConfig extends IntegrationConfig {
         System.out.println("입장 메시지 :" + messageQueue2.take());
         System.out.println("입장 메시지 :" + messageQueue2.take());
         ChatMessageResDto res = messageQueue2.take();
-        System.out.println("응답 메시지 :" + res);
 
         // Then
         assertThat(res.getSender()).isEqualTo(PRODUCER_NAME);
@@ -163,9 +159,8 @@ class WebSocketConfig extends IntegrationConfig {
         assertThat(res.getMessageType()).isEqualTo(MessageType.GROUP_CHAT);
     }
 
-    @Test
-    @Tag("webSocketSend")
-    @DisplayName("개인 메시지 전송 성공")
+    @IntegrateTest
+    @DisplayName("WebSocket 개인 채팅 메시지 전송 및 수신 성공")
     void dmChatSend_suc() throws ExecutionException, InterruptedException, TimeoutException {
         // Given
         StompHeaders headers1 = new StompHeaders();

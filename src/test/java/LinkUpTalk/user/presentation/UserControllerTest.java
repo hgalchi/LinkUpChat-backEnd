@@ -1,6 +1,7 @@
 package LinkUpTalk.user.presentation;
 
-import LinkUpTalk.chat.config.IntegrationConfig;
+import LinkUpTalk.annotation.UnitTest;
+import LinkUpTalk.chat.config.IntegrationTest;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.user.domain.repository.UserRepository;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-class UserControllerConfig extends IntegrationConfig {
+class UserControllerTest extends IntegrationTest {
 
     @Autowired
     MockMvc mvc;
@@ -72,8 +73,7 @@ class UserControllerConfig extends IntegrationConfig {
         user = testUtil.registerUser();
     }
 
-    @Test
-    @Tag("getUser")
+    @UnitTest
     @DisplayName("사용자 단건 조회 성공")
     @WithMockUser
     public void getsUser_suc() throws Exception {
@@ -87,8 +87,7 @@ class UserControllerConfig extends IntegrationConfig {
                 .andDo(print());
     }
 
-    @Test
-    @Tag("getUser")
+    @UnitTest
     @DisplayName("사용자 단건 조회 실패_인증되지 않은 회원 접근")
     @WithAnonymousUser
     public void getUser_failWithUnAuthorized() throws Exception {
@@ -102,8 +101,7 @@ class UserControllerConfig extends IntegrationConfig {
                 .andDo(print());
     }
 
-    @Test
-    @Tag("modifyUserProfile")
+    @UnitTest
     @DisplayName("사용자 정보 수정")
     @WithUserDetails(value=EMAIL,userDetailsServiceBeanName = "userDetailsServiceImpl", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     public void modifyUser() throws Exception {
@@ -128,8 +126,7 @@ class UserControllerConfig extends IntegrationConfig {
         assertThat(modifyUser.getName()).isEqualTo(USERNAME);
     }
 
-    @Test
-    @Tag("modifyUserProfile")
+    @UnitTest
     @DisplayName("사용자 정보 수정 실패_리소스 주인이 아님")
     @WithMockUser
     public void modifyUser_failWithForbidden() throws Exception {
@@ -148,7 +145,7 @@ class UserControllerConfig extends IntegrationConfig {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
+    @UnitTest
     @DisplayName("사용자 비밀번호 수정")
     @WithUserDetails(value=EMAIL,userDetailsServiceBeanName = "userDetailsServiceImpl", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     public void modifyUserPassword() throws Exception {
@@ -172,7 +169,7 @@ class UserControllerConfig extends IntegrationConfig {
         assertThat(passwordEncoder.matches(newPassword, modifyUser.getPassword())).isTrue();
     }
 
-    @Test
+    @UnitTest
     @DisplayName("사용자 비밀번호 수정 실패_리소스 주인이 아님")
     @WithMockUser
     public void modifyUserPassword_failWithForbidden() throws Exception {

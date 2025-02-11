@@ -1,7 +1,7 @@
 package LinkUpTalk.auth.presentation;
 
 import LinkUpTalk.auth.domain.Repository.RefreshRepository;
-import LinkUpTalk.chat.config.IntegrationConfig;
+import LinkUpTalk.chat.config.IntegrationTest;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.auth.domain.Refresh;
 import LinkUpTalk.auth.domain.constant.TokenType;
@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureDataMongo
 @ActiveProfiles("test")
-class AuthControllerConfig extends IntegrationConfig {
+class AuthControllerTest extends IntegrationTest {
 
     private MockMvc mvc;
 

@@ -3,26 +3,23 @@ package LinkUpTalk.chat.presentation.handler;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import LinkUpTalk.annotation.UnitTest;
 import LinkUpTalk.chat.application.ChatService;
-import LinkUpTalk.chat.presentation.handler.JwtChannelInterceptor;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import LinkUpTalk.common.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,13 +37,13 @@ public class JwtChannelInterceptorTest {
     private UserDetailsService userDetailsService;
 
     @Mock
-    private ChatService chatServcie;
+    private ChatService chatService;
 
     @Mock
     private MessageChannel messageChannel;
 
-    @Test
-    @DisplayName("웹 소켓 연결")
+    @UnitTest
+    @DisplayName("유효한 JWT 토큰으로 WebSocket 연결 시 인증 성공")
     void connect_validToken() {
         // Given
         String validToken = "Bearer valid.jwt.token";
@@ -79,8 +76,8 @@ public class JwtChannelInterceptorTest {
         assertEquals(email, resultAccessor.getUser().getName());
     }
 
-    @Test
-    @DisplayName("웹 소켓 연결 실패_유효하지 않은 토큰")
+    @UnitTest
+    @DisplayName("유효하지 않은 JWT 토큰으로 WebSocket 연결 시 인증 실패")
     void connect_failWithExpiredToken(){
         // Given
         String expiredToken = "Bearer expired.jwt.token";
