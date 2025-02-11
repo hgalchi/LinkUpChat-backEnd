@@ -18,16 +18,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 
 @Configuration
-//@EnableMongoRepositories(basePackageClasses = LinkUpTalk.chat.infrastructor.mongo.MongoChatMessageRepository.class)
 @EnableMongoAuditing
-@EnableJpaRepositories(
-        basePackages = "LinkUpTalk",
-        excludeFilters = @ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE,
-                classes = MongoChatMessageRepository.class
-        )
-)
-
 public class MongoConfig {
 
     @Bean

@@ -1,5 +1,6 @@
 package LinkUpTalk.chat.application;
 
+import LinkUpTalk.annotation.UnitTest;
 import LinkUpTalk.chat.domain.ChatMessage;
 import LinkUpTalk.chat.domain.ChatRoom;
 import LinkUpTalk.chat.domain.ChatRoomDetail;
@@ -9,6 +10,7 @@ import LinkUpTalk.chat.domain.repository.ChatRoomDetailRepository;
 import LinkUpTalk.chat.domain.repository.ChatRoomRepository;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +57,7 @@ class ChatServiceTest {
 
 
     @Test
-    @DisplayName("채팅방 입장")
+    @DisplayName("사용자는 채팅방에 입장할 수 있다.")
     void join_suc(){
         //given
         ChatMessageReqDto expected = ChatMessageReqDto.builder()
@@ -69,8 +71,8 @@ class ChatServiceTest {
         User user = User.builder().name(PRODUCER).build();
         ChatRoomDetail chatRoomDetail = ChatRoomDetail.builder().build();
 
-        when(chatRoomRepository.findById(ROOM_ID)).thenReturn(Optional.of(chatRoom));
-        when(userRepository.findByEmail(PRODUCER_EMAIL)).thenReturn(Optional.of(user));
+        when(chatRoomRepository.read(ROOM_ID)).thenReturn(chatRoom);
+        when(userRepository.readByEmail(PRODUCER_EMAIL)).thenReturn(user);
         when(chatRoomDetailRepository.findByChatRoom(chatRoom)).thenReturn(List.of(chatRoomDetail));
 
         //when
@@ -79,8 +81,23 @@ class ChatServiceTest {
         assertThat(dto).usingRecursiveComparison().isEqualTo(expected);
     }
 
-    @Test
-    @DisplayName("그룹 채팅 메시지 저장")
+    @UnitTest
+    @DisplayName("사용자 입장 시 방정원이 초과하면 요청은 실패한다.")
+    void join_failWithCapacityOver(){
+        //given
+        ChatRoom chatRoom = ChatRoom.builder().name("Test chatRoom").capacity(8).participantCount(8).build();
+        User user = User.builder().name(PRODUCER).build();
+
+        when(chatRoomRepository.read(ROOM_ID)).thenReturn(chatRoom);
+        when(userRepository.readByEmail(PRODUCER_EMAIL)).thenReturn(user);
+
+        //when & then
+        assertThrows(BusinessException.class, () -> chatService.join(PRODUCER_EMAIL, ROOM_ID));
+    }
+
+
+    @UnitTest
+    @DisplayName("그룹 채팅 메시지를 저장할 수 있다.")
     void saveMessage_suc() {
         //given
         ChatMessageReqDto expected = ChatMessageReqDto.builder()
@@ -93,8 +110,8 @@ class ChatServiceTest {
         ChatRoom chatRoom = ChatRoom.builder().name("Test chatRoom").capacity(8).build();
         User user = User.builder().name("Producer").build();
 
-        when(chatRoomRepository.findById(ROOM_ID)).thenReturn(Optional.of(chatRoom));
-        when(userRepository.findByEmail(PRODUCER_EMAIL)).thenReturn(Optional.of(user));
+        when(chatRoomRepository.read(ROOM_ID)).thenReturn(chatRoom);
+        when(userRepository.readByEmail(PRODUCER_EMAIL)).thenReturn(user);
 
         ChatMessageReqDto dto = chatService.saveGroupMessage(PRODUCER_EMAIL, ROOM_ID, GROUP_MESSAGE);
 
@@ -102,8 +119,8 @@ class ChatServiceTest {
         verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
     }
 
-    @Test
-    @DisplayName("개인 채팅 메시지 저장")
+    @UnitTest
+    @DisplayName("개인 채팅 메시지를 저장할 수 있다.")
     void saveDmMessage() {
         //given
         ChatMessageDmSendReqDto reqDto = ChatMessageDmSendReqDto.builder().content(DM_MESSAGE).receiverId(2L).build();
@@ -119,9 +136,9 @@ class ChatServiceTest {
         User producer = User.builder().name(PRODUCER).build();
         User receiver = User.builder().name(RECEIVER).email(RECEIVER_EMAIL).build();
 
-        when(chatRoomRepository.findById(ROOM_ID)).thenReturn(Optional.of(chatRoom));
-        when(userRepository.findByEmail(PRODUCER_EMAIL)).thenReturn(Optional.of(producer));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
+        when(chatRoomRepository.read(ROOM_ID)).thenReturn(chatRoom);
+        when(userRepository.readByEmail(PRODUCER_EMAIL)).thenReturn(producer);
+        when(userRepository.read(2L)).thenReturn(receiver);
 
         ChatMessageReqDto dto = chatService.saveDmMessage(PRODUCER_EMAIL,ROOM_ID, reqDto);
 

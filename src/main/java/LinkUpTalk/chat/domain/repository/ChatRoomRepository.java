@@ -12,4 +12,6 @@ public interface ChatRoomRepository {
     ChatRoom save(ChatRoom chatRoom);
 
     Optional<ChatRoom> findById(Long chatRoomId);
+
+    ChatRoom read(Long chatRoomId);
 }
