@@ -48,15 +48,15 @@ public class ChatRoom extends BaseEntity {
     @Builder.Default
     private Set<ChatRoomDetail> participants = new HashSet<>();
 
-    public static ChatRoom of(String name, int capacity, ChatRoomType chatRoomType) {
+    public static ChatRoom ofGroup(String name, int capacity) {
         return ChatRoom.builder()
                 .name(name)
                 .capacity(capacity)
-                .chatRoomType(chatRoomType)
+                .chatRoomType(ChatRoomType.GROUP)
                 .build();
     }
 
-    public static ChatRoom of() {
+    public static ChatRoom ofDm() {
         return ChatRoom.builder()
                 .capacity(2)
                 .chatRoomType(ChatRoomType.DM)
