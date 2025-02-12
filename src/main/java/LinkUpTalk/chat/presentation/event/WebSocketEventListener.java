@@ -19,7 +19,6 @@ import org.springframework.web.socket.messaging.*;
 import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
-// evnetListeneer-> controller로 변경할지 생각해보기
 
 @Component
 @RequiredArgsConstructor
@@ -27,15 +26,14 @@ import java.util.Optional;
 public class WebSocketEventListener {
 
     private final ChatService socketService;
-    private final RedisTemplate<String,Object> redisTemplate;
     private final SimpMessagingTemplate messageTemplate;
-    private static final String CHANNEL_TOPIC = "chatroom";
+    private final RedisPublisher publisher;
 
     @EventListener
     public void handleSocketConnectListener(SessionConnectEvent event) {
         log.info("WebSocket Connect");
-        StompHeaderAccessor accessor = getStompHeaderAccessor(event);
-        String email = accessor.getUser().getName();
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String email = getEmail(accessor);
 
         log.info("{} 사용자 연결",email);
     }
@@ -50,8 +48,7 @@ public class WebSocketEventListener {
 
             if(destination.startsWith("/topic/chat/group")) {
                 Long roomId = parseRoomId(destination);
-                ChatMessageReqDto message=socketService.join(email, roomId);
-                redisTemplate.convertAndSend(CHANNEL_TOPIC, message);
+                publisher.sendMessage(socketService.join(email, roomId));
             //todo : event 비동기 처리 exception
             }
         }catch (BusinessException ex) {

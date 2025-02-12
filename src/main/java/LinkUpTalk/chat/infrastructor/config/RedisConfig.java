@@ -1,12 +1,11 @@
 package LinkUpTalk.chat.infrastructor.config;
 
-import LinkUpTalk.chat.application.RedisSubscriber;
+import LinkUpTalk.chat.presentation.event.RedisSubscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -32,8 +31,7 @@ public class RedisConfig {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(host);
         redisStandaloneConfiguration.setPort(Integer.parseInt(port));
-        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);
-        return lettuceConnectionFactory;
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
     @Bean

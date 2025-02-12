@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.application;
+package LinkUpTalk.chat.presentation.event;
 
 import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
