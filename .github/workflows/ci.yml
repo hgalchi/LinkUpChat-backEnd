@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
@@ -33,21 +33,9 @@ jobs:
       - name: Grant execute permissions to gradlew
         run: chmod +x ./gradlew
 
-      - name: Create .env.properties file # 환경설정 주입
-        run: |
-          cat > .env.properties <<EOF
-          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
-          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
-          POSTGRES_URL=${{ secrets.POSTGRES_URL }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-          POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          MONGO_URI=${{secrets.MONGO_URI}}
-          REDIS_PORT=${{ secrets.REDIS_PORT }}
-          EOF
-        shell: bash
-
       - name: Build with Gradle # application 빌드
         run: ./gradlew clean build
+
+
 
 
