@@ -69,7 +69,7 @@ jobs:
             echo "${{vars.DOCKER_COMPOSE}}" | sudo tee docker-compose.yml > /dev/null
             
             sudo docker ps
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat:latest
             sudo docker stop linkupchat || true
             sudo docker rm linkupchat || true
             docker-compose -f docker-compose.yml --env-file ./.env up -d
