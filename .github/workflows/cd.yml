@@ -33,34 +33,33 @@ jobs:
       - name: Grant execute permissions to gradlew
         run: chmod +x ./gradlew
 
-      - name: Create .env.properties file
-        run: |
-          cat > .env.properties <<EOF
-          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
-          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-          POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          
-          MONGO_HOST=${{secrets.MONGO_HOST}}
-          MONGO_PORT=${{secrets.MONGO_PORT}}
-          MONGO_DB=${{secrets.MONGO_DB}}
-          MONGO_USERNAME=${{secrets.MONGO_USERNAME}}
-          MONGO_PASSWORD=${{secrets.MONGO_PASSWORD}}
-          
-          REDIS_PORT=${{ secrets.REDIS_PORT }}
-          REDIS_HOST=${{secrets.REDIS_HOST}}
-          EOF
-          echo "Generated .env.properties:"
-          cat .env.properties
-        shell: bash
 
       - name: Build with Gradle
         run: ./gradlew clean build --exclude-task test
 
+
+      - name: Set environment variables
+        run: |
+          echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
+          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "MONGO_HOST=${{secrets.MONGO_HOST}}" >> .env
+          echo "MONGO_PORT=${{secrets.MONGO_PORT}}" >> .env
+          echo "MONGO_DB=${{secrets.MONGO_DB}}" >> .env
+          echo "MONGO_USERNAME=${{secrets.MONGO_USERNAME}}" >> .env
+          echo "MONGO_PASSWORD=${{secrets.MONGO_PASSWORD}}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+        shell: bash
+
+      - name: Verify .env file
+        run: cat .env
+
       # 3. Docker 이미지 빌드
       - name: docker image build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat .
+        run: docker build --build-arg ENV_FILE=.env -t ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat .
 
       # 4. DockerHub 로그인
       - name: docker login
@@ -73,20 +72,20 @@ jobs:
       - name: docker Hub push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
 
-      # docker deploy
-      - name: Docker Deploy executing remote ssh commands using ssh_key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER}}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo docker ps
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
-            sudo docker stop linkupchat || true
-            sudo docker rm linkupchat || true
-            sudo docker run -d --name linkupchat --restart always -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
-            sudo docker image prune -f
+#      # docker deploy
+#      - name: Docker Deploy executing remote ssh commands using ssh_key
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USER}}
+#          key: ${{ secrets.SSH_KEY }}
+#          script: |
+#            sudo docker ps
+#            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
+#            sudo docker stop linkupchat || true
+#            sudo docker rm linkupchat || true
+#            sudo docker run -d --name linkupchat --restart always -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/linkupchat
+#            sudo docker image prune -f
 
 
 
