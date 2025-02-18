@@ -1,0 +1,22 @@
+spring:
+  config:
+    import:
+      - classpath:application-secret.yml
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chatting-total
+    username: chatUser
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/chatDb
+      authentication-database: admin
+
+  sql:
+    init:
+      mode: never
+
+  redis:
+    host: localhost
+    port: 6379
