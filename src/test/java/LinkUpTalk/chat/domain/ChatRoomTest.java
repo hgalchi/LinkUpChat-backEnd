@@ -1,7 +1,6 @@
 package LinkUpTalk.chat.domain;
 
 import LinkUpTalk.annotation.UnitTest;
-import LinkUpTalk.chat.domain.constant.ChatRoomType;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import org.junit.jupiter.api.BeforeEach;

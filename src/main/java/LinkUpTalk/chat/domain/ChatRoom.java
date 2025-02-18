@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Where(clause = "deleted = false")
+@Where(clause = "isDeleted = false")
 public class ChatRoom extends BaseEntity {
 
     @Id
@@ -37,7 +37,7 @@ public class ChatRoom extends BaseEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean deleted=false;
+    private boolean isDeleted = false;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -92,7 +92,7 @@ public class ChatRoom extends BaseEntity {
     }
 
     public void delete() {
-        this.deleted=true;
+        this.isDeleted =true;
         this.deleteEntity(LocalDateTime.now());
         this.participants.forEach(ChatRoomDetail::delete);
     }
