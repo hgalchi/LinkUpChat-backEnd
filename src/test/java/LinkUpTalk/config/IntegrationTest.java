@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.config;
+package LinkUpTalk.config;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;

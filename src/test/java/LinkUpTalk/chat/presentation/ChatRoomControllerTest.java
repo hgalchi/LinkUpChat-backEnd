@@ -2,8 +2,8 @@ package LinkUpTalk.chat.presentation;
 
 import LinkUpTalk.annotation.UnitTest;
 import LinkUpTalk.chat.application.ChatRoomService;
-import LinkUpTalk.chat.config.TestSecurityConfig;
-import LinkUpTalk.chat.config.TestWebSocketConfig;
+import LinkUpTalk.config.TestSecurityConfig;
+import LinkUpTalk.config.TestWebSocketConfig;
 import LinkUpTalk.chat.presentation.dto.ChatRoomCreateReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatRoomModifyReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatroomGetResDto;
