@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Where(clause = "isDeleted = false")
+@Where(clause = "is_deleted = false")
 public class ChatRoom extends BaseEntity {
 
     @Id

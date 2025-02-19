@@ -13,7 +13,7 @@ import org.hibernate.annotations.Where;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Where(clause = "isDeleted = false")
+@Where(clause = "is_deleted = false")
 public class ChatRoomDetail extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
