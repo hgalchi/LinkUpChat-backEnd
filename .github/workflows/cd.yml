@@ -38,3 +38,7 @@ jobs:
             sudo docker rm linkupchat || true
             docker-compose -f docker-compose.yml --env-file ./.env up -d
             sudo docker image prune -f
+
+
+
+
