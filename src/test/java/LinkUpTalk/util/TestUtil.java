@@ -34,27 +34,12 @@ public class TestUtil {
     @Autowired
     private JwtUtil jwtUtil;
 
-
-    final String USERNAME = "spring11";
-    final String PASSWORD = "spring123";
-    final String EMAIL = "spring11@naver.com";
-
-    public User registerUser() {
+    public User registerUser(String username,String email,String password){
         Roles role = groupRepository.findByCode(RoleType.CUSTOMER.getRole()).get();
-        User user = User.of(USERNAME, PASSWORD, EMAIL);
+        User user = User.of(username, password, email);
         user.addRole(role);
-        user.encodePassword(passwordEncoder.encode(PASSWORD));
+        user.encodePassword(passwordEncoder.encode(password));
         userRepository.save(user);
-        return user;
-    }
-
-    public User registerUsers(String email,String name){
-        Roles role = groupRepository.findByCode(RoleType.CUSTOMER.getRole()).get();
-        User user = User.of(name, PASSWORD, email);
-        user.addRole(role);
-        user.encodePassword(passwordEncoder.encode(PASSWORD));
-        userRepository.save(user);
-        System.out.println(user.getEmail());
         return user;
     }
 

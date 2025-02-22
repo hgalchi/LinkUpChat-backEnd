@@ -1,7 +1,7 @@
 package LinkUpTalk.chat;
 
 import LinkUpTalk.annotation.IntegrateTest;
-import LinkUpTalk.chat.config.IntegrationTest;
+import LinkUpTalk.config.IntegrationTest;
 import LinkUpTalk.chat.domain.constant.MessageType;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageResDto;
@@ -23,14 +23,15 @@ import java.lang.reflect.Type;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_CLASS;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@Sql(scripts = "/websocket-test-data.sql", executionPhase = BEFORE_TEST_CLASS)
-class WebSocketChatIntegrationTest extends IntegrationTest {
+@Sql(scripts = "/websocket-test-setup.sql", executionPhase = BEFORE_TEST_CLASS)
+@Sql(scripts = "/websocket-test-cleanup.sql", executionPhase = AFTER_TEST_CLASS)
+class ChatServiceIntegrationTest extends IntegrationTest {
 
     @LocalServerPort
     private int port;

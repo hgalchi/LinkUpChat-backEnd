@@ -1,0 +1,23 @@
+spring:
+  config:
+    import:
+      - classpath:application-secret.yml
+      - optional:file:.env.properties
+
+  datasource:
+      url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      username: ${POSTGRES_USERNAME}
+      password: ${POSTGRES_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}
+      authentication-database: admin
+
+  sql:
+    init:
+      mode: never
+
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}

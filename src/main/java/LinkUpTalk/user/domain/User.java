@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
-@Where(clause = "deleted = false")
+@Where(clause = "is_deleted = false")
 public class User extends BaseEntity {
 
     @Id
@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Builder.Default
-    private boolean deleted = false;
+    private boolean isDeleted = false;
 
     @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
@@ -84,7 +84,7 @@ public class User extends BaseEntity {
     }
 
     public void delete() {
-        this.deleted=true;
+        this.isDeleted=true;
         this.deleteEntity(LocalDateTime.now());
         this.chatRooms.forEach(ChatRoomDetail::delete);
     }

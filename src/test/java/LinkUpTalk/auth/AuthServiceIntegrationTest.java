@@ -1,7 +1,9 @@
-package LinkUpTalk.auth.presentation;
+package LinkUpTalk.auth;
 
+import LinkUpTalk.annotation.IntegrateTest;
 import LinkUpTalk.auth.domain.Repository.RefreshRepository;
-import LinkUpTalk.chat.config.IntegrationTest;
+import LinkUpTalk.config.IntegrationTest;
+import LinkUpTalk.user.infrastructor.JpaUserRepository;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.auth.domain.Refresh;
 import LinkUpTalk.auth.domain.constant.TokenType;
@@ -14,7 +16,6 @@ import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -37,13 +38,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "de.flapdoodle.mongodb.embedded.version=5.0.5")
-@Transactional
+@SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureDataMongo
+@Transactional
 @ActiveProfiles("test")
-class AuthControllerTest extends IntegrationTest {
+class AuthServiceIntegrationTest extends IntegrationTest {
 
+    @Autowired
     private MockMvc mvc;
 
     @Autowired
@@ -64,11 +65,10 @@ class AuthControllerTest extends IntegrationTest {
     @Autowired
     private TestUtil testUtil;
 
-    private User user;
+    final String USERNAME = "testAuthUser";
+    final String PASSWORD = "AutUser1234";
+    final String EMAIL = "testAuthUser@test.com";
 
-    final String USERNAME = "spring11";
-    final String PASSWORD = "spring123";
-    final String EMAIL = "spring11@naver.com";
 
     @BeforeEach
     public void setup(){
@@ -77,11 +77,9 @@ class AuthControllerTest extends IntegrationTest {
                 .apply(springSecurity())
                 .alwaysDo(print())
                 .build();
-
     }
 
-    @Test
-    @Tag("signUp")
+    @IntegrateTest
     @DisplayName("회원가입 성공")
     public void register_suc() throws Exception {
         //given
@@ -98,12 +96,11 @@ class AuthControllerTest extends IntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @Tag("signUp")
+    @IntegrateTest
     @DisplayName("회원가입 실패_이메일 형식 오류")
     public void register_failWithValidation() throws Exception {
         //given
-        String invalidEmail="wywuwid";
+        String invalidEmail="testAuthUser";
         UserCreateReqDto dto = UserCreateReqDto.builder()
                 .name(USERNAME)
                 .password(PASSWORD)
@@ -117,12 +114,11 @@ class AuthControllerTest extends IntegrationTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Test
-    @Tag("signUp")
+    @IntegrateTest
     @DisplayName("회원가입 실패_중복된 이메일")
     public void register_failWithDuplicatedEmail() throws Exception {
         //given
-        testUtil.registerUser();
+        testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
         UserCreateReqDto dto = UserCreateReqDto.builder()
                 .name(USERNAME)
                 .password(PASSWORD)
@@ -136,12 +132,11 @@ class AuthControllerTest extends IntegrationTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Test
-    @Tag("signIn")
+    @IntegrateTest
     @DisplayName("로그인 성공")
     public void login_suc() throws Exception {
         //given
-        testUtil.registerUser();
+        testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
 
         //when & then
         mvc.perform(formLogin().user(EMAIL).password(PASSWORD))
@@ -149,12 +144,11 @@ class AuthControllerTest extends IntegrationTest {
     }
 
 
-    @Test
-    @Tag("signIn")
+    @IntegrateTest
     @DisplayName("로그인 실패_잘못된 아이디")
     public void login_failWithWrongID() throws Exception {
         //given
-        testUtil.registerUser();
+        testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
 
         //when & then
         mvc.perform(formLogin().user(EMAIL+"Wrong").password(PASSWORD))
@@ -162,13 +156,12 @@ class AuthControllerTest extends IntegrationTest {
 
 
     }
-    @Test
-    @Tag("signOut")
+    @IntegrateTest
     @DisplayName("사용자 탈퇴")
     @WithMockUser(username=EMAIL,roles = "CUSTOMER")
     public void deleteUser_suc() throws Exception {
         //given
-        User user=testUtil.registerUser();
+        User user=testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
 
         //when
         mvc.perform(delete("/auth/signOut/{userId}", user.getId()))
@@ -179,11 +172,11 @@ class AuthControllerTest extends IntegrationTest {
         Assertions.assertThat(deleteUser.isDeleted()).isTrue();
     }
 
-    @Test
+    @IntegrateTest
     @DisplayName("액세스 토큰 재발급 성공")
     public void issueRefresh_suc() throws Exception {
         // given
-        User user = testUtil.registerUser();
+        User user = testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
         String refreshToken = registerRefresh(user);
 
         // when
@@ -202,7 +195,7 @@ class AuthControllerTest extends IntegrationTest {
         assertThat(refreshTokenCookie).isNotNull();
     }
 
-    @Test
+    @IntegrateTest
     @DisplayName("액세스 토큰 재발급 실패_리플레시 토큰을 찾을 수 없음")
     public void issueRefresh_failWithExpiredRefresh() throws Exception {
 

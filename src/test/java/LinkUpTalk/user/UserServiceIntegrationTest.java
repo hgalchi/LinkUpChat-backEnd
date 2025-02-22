@@ -1,7 +1,8 @@
-package LinkUpTalk.user.presentation;
+package LinkUpTalk.user;
 
+import LinkUpTalk.annotation.IntegrateTest;
 import LinkUpTalk.annotation.UnitTest;
-import LinkUpTalk.chat.config.IntegrationTest;
+import LinkUpTalk.config.IntegrationTest;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.user.domain.repository.UserRepository;
@@ -10,8 +11,7 @@ import LinkUpTalk.user.presentation.dto.UserPasswordModifyReqDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,10 +38,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-class UserControllerTest extends IntegrationTest {
+class UserServiceIntegrationTest extends IntegrationTest {
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     @Autowired
     private WebApplicationContext ctx;
@@ -50,18 +50,18 @@ class UserControllerTest extends IntegrationTest {
     private ObjectMapper mapper;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    TestUtil testUtil;
+    private TestUtil testUtil;
 
     private User user;
-    final String USERNAME = "spring11";
-    final String PASSWORD = "spring123";
-    final String EMAIL = "spring11@naver.com";
+    final String USERNAME = "testUser";
+    final String PASSWORD = "testUser1234";
+    final String EMAIL = "testUser@test.com";
 
     @BeforeEach()
     public void setup() {
@@ -70,10 +70,12 @@ class UserControllerTest extends IntegrationTest {
                 .apply(springSecurity())
                 .alwaysDo(print())
                 .build();
-        user = testUtil.registerUser();
+
+        user = testUtil.registerUser(USERNAME,EMAIL,PASSWORD);
+
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 단건 조회 성공")
     @WithMockUser
     public void getsUser_suc() throws Exception {
@@ -87,7 +89,7 @@ class UserControllerTest extends IntegrationTest {
                 .andDo(print());
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 단건 조회 실패_인증되지 않은 회원 접근")
     @WithAnonymousUser
     public void getUser_failWithUnAuthorized() throws Exception {
@@ -101,7 +103,7 @@ class UserControllerTest extends IntegrationTest {
                 .andDo(print());
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 정보 수정")
     @WithUserDetails(value=EMAIL,userDetailsServiceBeanName = "userDetailsServiceImpl", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     public void modifyUser() throws Exception {
@@ -126,7 +128,7 @@ class UserControllerTest extends IntegrationTest {
         assertThat(modifyUser.getName()).isEqualTo(USERNAME);
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 정보 수정 실패_리소스 주인이 아님")
     @WithMockUser
     public void modifyUser_failWithForbidden() throws Exception {
@@ -145,12 +147,13 @@ class UserControllerTest extends IntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 비밀번호 수정")
     @WithUserDetails(value=EMAIL,userDetailsServiceBeanName = "userDetailsServiceImpl", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     public void modifyUserPassword() throws Exception {
         //given
-        String newPassword = "12345678";
+
+        String newPassword = "testUser56789";
         UserPasswordModifyReqDto dto = UserPasswordModifyReqDto.builder()
                 .password(PASSWORD)
                 .newPassword(newPassword)
@@ -169,7 +172,7 @@ class UserControllerTest extends IntegrationTest {
         assertThat(passwordEncoder.matches(newPassword, modifyUser.getPassword())).isTrue();
     }
 
-    @UnitTest
+    @IntegrateTest
     @DisplayName("사용자 비밀번호 수정 실패_리소스 주인이 아님")
     @WithMockUser
     public void modifyUserPassword_failWithForbidden() throws Exception {

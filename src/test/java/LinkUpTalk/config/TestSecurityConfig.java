@@ -1,4 +1,4 @@
-package LinkUpTalk.chat.config;
+package LinkUpTalk.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

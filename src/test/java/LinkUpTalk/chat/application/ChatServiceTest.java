@@ -56,7 +56,7 @@ class ChatServiceTest {
     private static final String DM_MESSAGE = "처음 봬요";
 
 
-    @Test
+    @UnitTest
     @DisplayName("사용자는 채팅방에 입장할 수 있다.")
     void join_suc(){
         //given

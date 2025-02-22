@@ -13,7 +13,7 @@ import org.hibernate.annotations.Where;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Where(clause = "deleted = false")
+@Where(clause = "is_deleted = false")
 public class ChatRoomDetail extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class ChatRoomDetail extends BaseEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean deleted=false;
+    private boolean isDeleted =false;
 
 
     public static ChatRoomDetail of(ChatRoom chatRoom, User user, ChatRoomRoleType chatRoomRole) {
@@ -44,6 +44,6 @@ public class ChatRoomDetail extends BaseEntity {
     }
 
     public void delete(){
-        this.deleted = true;
+        this.isDeleted = true;
     }
 }
