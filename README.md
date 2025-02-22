@@ -18,15 +18,12 @@
 - GitHub Acations, Docker기반 자동 CD파이프라인을 구축 
 - TestContainer로 활용하여 테스트 환경을 통일하고 환경 차이를 최소화
 
-
 ## 실행 방법
 Docker 
 
-<<<<<<< HEAD
 ```sh
 docker-compose -f docker-compose-dev.yml up -d
 ```
-
 
 ## 개발 환경
 **BackEnd**
