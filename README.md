@@ -1,4 +1,4 @@
-# LinkUPChat
+# LinkUpChat
 </p>
 <div align="center">
     <img width="374" alt="Image" src="https://github.com/user-attachments/assets/8fbfceff-fab4-4c28-9cbf-fb55ed3a8a9e" />
