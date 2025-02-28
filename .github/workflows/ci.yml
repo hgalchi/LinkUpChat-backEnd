@@ -30,6 +30,9 @@ jobs:
           echo "${{ secrets.APPLICATION_SECRET }}" | base64 -d > ./src/main/resources/application-secret.yml
         shell: bash
 
+      - name: Grant execute permissions to gradlew
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle # application 빌드
         run: ./gradlew clean build
 
