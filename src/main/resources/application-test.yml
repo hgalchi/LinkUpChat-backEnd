@@ -25,9 +25,9 @@ de:
 
 logging:
   level:
-    de.flapdoodle.embed.mongo: DEBUG
-    org.springframework.data.redis: DEBUG
-    redis.embedded: DEBUG
+    de.flapdoodle.embed.mongo: TRACE
+    org.springframework.data.redis: TRACE
+    redis.embedded: TRACE
     com:
       mongodb=DEBUG:
     org.springframework: DEBUG
