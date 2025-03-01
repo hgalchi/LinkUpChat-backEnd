@@ -4,9 +4,12 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  redis:
+    host: localhost
+    port: 54322
   jpa:
     hibernate:
-      ddl-auto: create-drop  # Hibernate가 테이블 자동 생성
+      ddl-auto: create-drop
     defer-datasource-initialization: true
     show-sql: true
     properties:
@@ -14,9 +17,14 @@ spring:
   sql:
     init:
       mode: always
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
+
 logging:
   level:
-    org.hibernate.orm.jdbc.bind: trace
     org:
       springframework:
         jdbc:

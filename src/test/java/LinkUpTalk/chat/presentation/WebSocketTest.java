@@ -111,7 +111,6 @@ class WebSocketTest {
 
         ChatMessageResDto res1 = messageQueue1.poll(3, TimeUnit.SECONDS);
         ChatMessageResDto res2 = messageQueue2.poll(3, TimeUnit.SECONDS);
-        System.out.println("res1: " + res1 + " res2: " + res2);
 
         // Then
         assertThat(res1).isNotNull();
@@ -155,9 +154,10 @@ class WebSocketTest {
         // When
         session1.send("/pub/chat/group/"+GROUP_CHATROOM_ID, "hi");
 
-        System.out.println(messageQueue2.take());
-        System.out.println(messageQueue2.take());
+        System.out.println("입장 메시지 :"+messageQueue2.take());
+        System.out.println("입장 메시지 :"+messageQueue2.take());
         ChatMessageResDto res = messageQueue2.take();
+        System.out.println("응답 메시지 :"+res);
 
         // Then
         assertThat(res.getSender()).isEqualTo(PRODUCER_NAME);

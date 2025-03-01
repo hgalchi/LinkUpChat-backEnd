@@ -24,8 +24,8 @@ spring:
     properties:
       hibernate:
         show_sql: true
-        highlight_sql: true # SQL 문 색 부여
-        dialect: org.hibernate.dialect.PostgreSQLDialect # Hibernate Dialect 추가
+        highlight_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:
       mode: never
