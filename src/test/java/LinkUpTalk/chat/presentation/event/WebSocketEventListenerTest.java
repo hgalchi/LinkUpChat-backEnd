@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
@@ -26,6 +27,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static reactor.core.publisher.Mono.when;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class WebSocketEventListenerTest {
 
     @Spy
