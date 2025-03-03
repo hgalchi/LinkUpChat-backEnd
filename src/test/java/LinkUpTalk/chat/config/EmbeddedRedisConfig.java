@@ -34,7 +34,9 @@ public class EmbeddedRedisConfig {
     @PreDestroy
     public void preDestroy() throws IOException {
         redisServer.stop();
-    } public int findAvailablePort() throws IOException {
+    }
+
+    public int findAvailablePort() throws IOException {
         for (int port = 10000; port <= 65535; port++) {
             Process process = executeGrepProcessCommand(port);
             if (!isRunning(process)) {
@@ -49,8 +51,21 @@ public class EmbeddedRedisConfig {
      * Embedded Redis가 현재 실행중인지 확인
      */
     private boolean isRedisRunning() throws IOException {
-        return isRunning(executeGrepProcessCommand(port));
+        String os = System.getProperty("os.name").toLowerCase();
+        ProcessBuilder processBuilder;
+
+        if (os.contains("win")) {
+            // Windows 명령어
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", "tasklist | findstr redis");
+        } else {
+            // Linux 명령어
+            processBuilder = new ProcessBuilder("/bin/sh", "-c", "ps aux | grep redis");
+        }
+
+        Process process = processBuilder.start();
+        return process.getInputStream().read() != -1;
     }
+
 
     /**
      * 해당 port를 사용중인 프로세스를 확인하는 sh 실행
