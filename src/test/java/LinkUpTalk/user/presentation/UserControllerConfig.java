@@ -1,5 +1,6 @@
 package LinkUpTalk.user.presentation;
 
+import LinkUpTalk.chat.config.IntegrationConfig;
 import LinkUpTalk.util.TestUtil;
 import LinkUpTalk.user.domain.User;
 import LinkUpTalk.user.domain.repository.UserRepository;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-class UserControllerTest {
+class UserControllerConfig extends IntegrationConfig {
 
     @Autowired
     MockMvc mvc;

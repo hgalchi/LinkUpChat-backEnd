@@ -1,37 +1,15 @@
 spring:
-  datasource:
-    url: jdbc:h2:./data/demo
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  redis:
-    host: localhost
-    port: 54322
+
   jpa:
     hibernate:
       ddl-auto: create
-    defer-datasource-initialization: true
     show-sql: true
     properties:
-    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+
   sql:
     init:
       mode: always
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 5.0.5
 
-logging:
-  level:
-    de.flapdoodle.embed.mongo: TRACE
-#    org.springframework.data.redis: TRACE
-#    redis.embedded: TRACE
-#    com:
-#      mongodb=DEBUG:
-#    org.springframework: DEBUG
-#    org.springframework.beans.factory: DEBUG
-#    org.springframework.context.annotation: DEBUG
-#    org.springframework.context: DEBUG
-#    org.springframework.web: DEBUG
+

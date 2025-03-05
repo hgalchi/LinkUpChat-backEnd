@@ -1,7 +1,7 @@
 package LinkUpTalk.chat.presentation.event;
 
 import LinkUpTalk.chat.application.ChatService;
-import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.chat.config.IntegrationConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,17 +18,15 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static reactor.core.publisher.Mono.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class WebSocketEventListenerTest {
+class WebSocketEventListenerConfig extends IntegrationConfig {
 
     @Spy
     @InjectMocks
