@@ -3,6 +3,7 @@ package LinkUpTalk.chat.presentation;
 import LinkUpTalk.chat.application.ChatService;
 import LinkUpTalk.chat.presentation.dto.ChatMessageDmSendReqDto;
 import LinkUpTalk.chat.presentation.dto.ChatMessageReqDto;
+import LinkUpTalk.chat.presentation.event.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,9 +20,7 @@ import java.security.Principal;
 public class ChatController {
 
     private final ChatService chatService;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private static final String CHANNEL_TOPIC = "chatroom";
-
+    private final RedisPublisher publisher;
 
     @MessageMapping(value = "/chat/group/{roomId}")
     public void message(@Payload String message,
@@ -29,8 +28,7 @@ public class ChatController {
                         Principal principal) {
         log.info("webSocket Send : {} 사용자가 {}그룹 채팅방에 메시지를 전송",principal.getName(),roomId);
 
-        ChatMessageReqDto groupMessage = chatService.saveGroupMessage(principal.getName(), roomId, message);
-        redisTemplate.convertAndSend(CHANNEL_TOPIC,groupMessage);
+        publisher.sendMessage(chatService.saveGroupMessage(principal.getName(), roomId, message));
     }
 
     @MessageMapping("/chat/dm/{roomId}")
@@ -39,7 +37,6 @@ public class ChatController {
                              Principal principal) {
         log.info("webSocket Send : {} 사용자가 {}개인 채팅방에 메시지를 전송",principal.getName(),roomId);
 
-        ChatMessageReqDto dmMessage=chatService.saveDmMessage(principal.getName(),roomId,req);
-        redisTemplate.convertAndSend(CHANNEL_TOPIC, dmMessage);
+        publisher.sendMessage(chatService.saveDmMessage(principal.getName(),roomId,req));
     }
 }
