@@ -33,8 +33,8 @@ public class ChatRoomService {
 
     @Transactional
     public void createGroup(ChatRoomCreateReqDto dto) {
-        User user = findUser(dto.getUserId());
-        ChatRoom chatRoom = ChatRoom.of(dto.getName(), dto.getCapacity(), ChatRoomType.GROUP);
+        User user = userRepository.read(dto.getUserId());
+        ChatRoom chatRoom = ChatRoom.ofGroup(dto.getName(), dto.getCapacity());
         ChatRoomDetail chatRoomDetail = ChatRoomDetail.of(chatRoom, user, ChatRoomRoleType.HOST);
 
         chatRoom.addUser(chatRoomDetail);
@@ -43,26 +43,28 @@ public class ChatRoomService {
 
     @Transactional
     public void createDm(Long receiverId, String email) {
-        User user = findUserByEmail(email);
-        User receiver = findUser(receiverId);
-        ChatRoom chatRoom = ChatRoom.of();
+        User user = userRepository.readByEmail(email);
+        User receiver = userRepository.read(receiverId);
+        ChatRoom chatRoom = ChatRoom.ofDm();
+
         ChatRoomDetail chatRoomDetail = ChatRoomDetail.of(chatRoom, user, ChatRoomRoleType.HOST);
         ChatRoomDetail receiverChatRoomDetail = ChatRoomDetail.of(chatRoom, receiver, ChatRoomRoleType.HOST);
-
         chatRoom.addUser(chatRoomDetail);
         chatRoom.addUser(receiverChatRoomDetail);
+
         chatRoomRepository.save(chatRoom);
     }
 
     @Transactional(readOnly = true)
     public ChatroomGetResDto getChatRoom(Long chatRoomId) {
-        ChatRoom chatroom = findChatRoom(chatRoomId);
+        ChatRoom chatroom = chatRoomRepository.read(chatRoomId);
         return chatroom.toDto();
     }
 
     @Transactional(readOnly = true)
     public List<ChatroomGetResDto> getChatRooms(Pageable page, String keyWord) {
         Page<ChatRoom> chatRooms = chatRoomRepository.findAllByNameContaining(keyWord,page);
+
         return chatRooms.stream()
                 .map(ChatRoom::toDto)
                 .toList();
@@ -77,16 +79,16 @@ public class ChatRoomService {
 
     @Transactional(readOnly = true)
     public List<UserGetResDto> getParticipants(Long roomId) {
-        return findChatRoom(roomId).getParticipants().stream()
+        return chatRoomRepository.read(roomId).getParticipants().stream()
                 .map(ChatRoomDetail::getUser)
                 .map(User::toDto)
                 .toList();
     }
 
-    @jakarta.transaction.Transactional
+    @Transactional
     public void leave(String email,Long roomId) {
-        User user = findUserByEmail(email);
-        ChatRoom chatRoom = findChatRoom(roomId);
+        User user = userRepository.readByEmail(email);
+        ChatRoom chatRoom = chatRoomRepository.read(roomId);
         ChatRoomDetail leavingUser = findLeavingUser(chatRoom, user);
 
         chatRoom.removeUser(leavingUser);
@@ -94,29 +96,14 @@ public class ChatRoomService {
 
     @Transactional
     public void delete(Long chatRoomId) {
-        ChatRoom chatroom = findChatRoom(chatRoomId);
+        ChatRoom chatroom = chatRoomRepository.read(chatRoomId);
         chatroom.delete();
     }
 
     @Transactional
     public void modify(ChatRoomModifyReqDto dto, Long chatRoomId) {
-        ChatRoom chatroom = findChatRoom(chatRoomId);
+        ChatRoom chatroom = chatRoomRepository.read(chatRoomId);
         chatroom.update(dto.getName(),dto.getCapacity());
-    }
-
-    private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-    }
-
-    private ChatRoom findChatRoom(Long chatRoomId) {
-        return chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
     }
 
     private ChatRoomDetail findLeavingUser (ChatRoom chatRoom, User user) {

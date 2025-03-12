@@ -9,8 +9,4 @@ import java.util.List;
 public interface ChatRoomDetailRepository {
 
     List<ChatRoomDetail> findByChatRoom(ChatRoom chatroom);
-
-    List<ChatRoomDetail> findByUser(User user);
-
-    boolean existsByUserAndChatRoom(User user, ChatRoom chatRoom);
 }

@@ -13,9 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-/**
- * 리소스의 접근권한 인증 서비스
- */
 @Service
 @RequiredArgsConstructor
 public class ChatResourceAuthService {
@@ -25,22 +22,22 @@ public class ChatResourceAuthService {
     private final ChatRoomDetailRepository chatroomDetailRepository;
 
     public boolean isHost(Authentication authentication, Long chatRoomId) {
-        ChatRoom chatRoom = findChatRoom(chatRoomId);
-        User roomHost = findChatRoomHost(chatRoom);
-        User user = findUser(authentication.getName());
+        ChatRoom chatRoom = chatRoomRepository.read(chatRoomId);
+        User roomHost = getRoomHost(chatRoom);
+        User user = userRepository.readByEmail(authentication.getName());
 
         return user.getId().equals(roomHost.getId());
     }
 
     public boolean isParticipant(Authentication authentication, Long chatRoomId) {
-        ChatRoom chatroom= findChatRoom(chatRoomId);
-        User user = findUser(authentication.getName());
+        ChatRoom chatroom= chatRoomRepository.read(chatRoomId);
+        User user = userRepository.readByEmail(authentication.getName());
 
-        return user.getChatRooms().stream()
-                .anyMatch(userChatRoom -> userChatRoom.getChatRoom() == chatroom);
+        return chatroom.getParticipants().stream()
+                .anyMatch(userDetail -> userDetail.getUser() == user);
     }
 
-    private User findChatRoomHost(ChatRoom chatRoom) {
+    private User getRoomHost(ChatRoom chatRoom) {
         return chatroomDetailRepository.findByChatRoom(chatRoom)
                 .stream()
                 .filter(userChatRoom -> userChatRoom.getRole().equals(ChatRoomRoleType.HOST))
@@ -48,15 +45,4 @@ public class ChatResourceAuthService {
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
     }
-
-    private ChatRoom findChatRoom(Long chatRoomId){
-        return chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-    }
-
-    private User findUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
-    }
-
 }

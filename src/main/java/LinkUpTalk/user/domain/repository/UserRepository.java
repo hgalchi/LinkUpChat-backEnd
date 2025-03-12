@@ -10,6 +10,10 @@ public interface UserRepository{
     @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByEmail(String email);
 
+    User readByEmail(String email);
+
+    User read(Long id);
+
     boolean existsByEmail(String email);
 
     Optional<User> findById(Long userId);

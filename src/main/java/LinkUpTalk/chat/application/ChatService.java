@@ -16,7 +16,6 @@ import LinkUpTalk.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,8 +30,8 @@ public class ChatService {
 
     @Transactional
     public ChatMessageReqDto join(String email, Long roomId) {
-        User user = findUserByEmail(email);
-        ChatRoom chatRoom = findChatRoom(roomId);
+        User user = userRepository.readByEmail(email);
+        ChatRoom chatRoom = chatRoomRepository.read(roomId);
 
         if(!isUserExistsInChatRoom(chatRoom, user)){
             checkRoomCapacity(chatRoom);
@@ -48,11 +47,10 @@ public class ChatService {
 
     }
 
-    //메세지 저장
     @Transactional
     public ChatMessageReqDto saveGroupMessage(String email, Long roomId, String content) {
-        User user = findUserByEmail(email);
-        ChatRoom chatRoom= findChatRoom(roomId);
+        User user = userRepository.readByEmail(email);
+        ChatRoom chatRoom= chatRoomRepository.read(roomId);
         ChatMessage chatMessage = ChatMessage.of(user.getName(), roomId, content, MessageType.GROUP_CHAT);
 
         chatMessageRepository.save(chatMessage);
@@ -62,9 +60,9 @@ public class ChatService {
     // todo : fetch 전략 수정을 생각해보기
     @Transactional
     public ChatMessageReqDto saveDmMessage(String email,Long roomId, ChatMessageDmSendReqDto dto) {
-        User user = findUserByEmail(email);
-        ChatRoom chatRoom = findChatRoom(roomId);
-        User receiver = findUser(dto.getReceiverId());
+        User user = userRepository.readByEmail(email);
+        ChatRoom chatRoom = chatRoomRepository.read(roomId);
+        User receiver = userRepository.read(dto.getReceiverId());
         ChatMessage chatMessage = ChatMessage.of(user.getName(), roomId, dto.getContent(), MessageType.DM_CHAT);
 
         chatMessageRepository.save(chatMessage);
@@ -82,17 +80,4 @@ public class ChatService {
         return chatroomDetailRepository.findByChatRoom(chatRoom).stream()
                 .anyMatch(chatRoomDetail -> chatRoomDetail.getUser() == user);
     }
-
-    private ChatRoom findChatRoom(Long roomId){
-        return chatRoomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ResponseCode.CHATROOM_NOT_FOUND));
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
-    }
-
-    private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
-    }
-
 }
