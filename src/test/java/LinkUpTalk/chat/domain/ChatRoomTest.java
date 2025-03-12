@@ -1,17 +1,14 @@
 package LinkUpTalk.chat.domain;
 
+import LinkUpTalk.annotation.UnitTest;
 import LinkUpTalk.chat.domain.constant.ChatRoomType;
 import LinkUpTalk.common.exception.BusinessException;
 import LinkUpTalk.common.response.ResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperties;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class ChatRoomTest {
@@ -20,10 +17,10 @@ class ChatRoomTest {
 
     @BeforeEach
     void setUp(){
-        chatRoom = ChatRoom.of("test room", 10, ChatRoomType.GROUP);
+        chatRoom = ChatRoom.ofGroup("test room", 10);
     }
 
-    @Test
+    @UnitTest
     @DisplayName("채팅방에 유저를 추가하면 참가자 수가 증가해야한다.")
     void addUser_suc(){
         //given
@@ -37,7 +34,7 @@ class ChatRoomTest {
         assertThat(chatRoom.getParticipants()).contains(chatRoomDetail);
     }
 
-    @Test
+    @UnitTest
     @DisplayName("채팅방에 유저를 제거하면 참가자 수가 감소해야한다.")
     void removeUser_suc() {
         //given
@@ -52,7 +49,7 @@ class ChatRoomTest {
         assertThat(chatRoom.getParticipants()).doesNotContain(chatRoomDetail);
     }
 
-    @Test
+    @UnitTest
     @DisplayName("채팅방의 정보를 업데이트해야한다.")
     void updateChatRoom_suc(){
         //given
@@ -67,7 +64,7 @@ class ChatRoomTest {
         assertThat(chatRoom.getName()).isEqualTo(chatRoomName);
     }
 
-    @Test
+    @UnitTest
     @DisplayName("참가자보다 적은 capacity로 변경하면 예외가 발생해야한다.")
     void updateChatRoom_failWithCapacityMoreThanParticipantCount(){
         //given
@@ -83,7 +80,7 @@ class ChatRoomTest {
                 .hasMessageContaining(ResponseCode.INVALID_INPUT_VALUE.getMessage());
     }
 
-    @Test
+    @UnitTest
     @DisplayName("채팅방을 삭제하면 isDeleted값이 true가 되어야한다.")
     void deleteChatRoom_suc(){
         //given
