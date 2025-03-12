@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public abstract class IntegrationConfig {
+public abstract class IntegrationTest {
 
     private static final PostgreSQLContainer POSTGRES_CONTAINER;
             static {
