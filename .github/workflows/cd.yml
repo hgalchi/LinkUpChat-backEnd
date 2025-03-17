@@ -51,6 +51,8 @@ jobs:
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           REDIS_HOST=${{secrets.REDIS_HOST}}
           EOF
+          echo "Generated .env.properties:"
+          cat .env.properties
         shell: bash
 
       - name: Build with Gradle
