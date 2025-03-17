@@ -1,16 +1,7 @@
 version: '3.7'
 services:
   linkUpChat:
-    image: wywudi4168/LinkUpChat
+    image: wywudi4168/linkupchat
     container_name: LinkUpChat
     ports:
       - "8080:8080"
-    depends_on:
-      - redis
-      - postgres
-      - mongo
-    networks:
-      - chat-net
-  networks:
-    chat-net:
-      external: true
