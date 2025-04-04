@@ -5,14 +5,24 @@
 </div>
 <br>
 
-## 소개 
-
-모임의 구성원 모두가 다같이 구룹채팅을 즐기고, 개인,그룹채팅을 통해 소통할 수 있다. 
-
 ## 프로젝트 목표 
+**Redis & STOMP** 
+- 다중 인스턴스  환경에서 WebSocket 세션 공유 문제 해결
+- 개인 채팅, 단체 채팅 
+
+**Spring Security & JWT** 
+- JWT를 이용한 AccessToken과 RefreshToken 발급 및 로그인 처리
+
+**CI/CD 자동 배포**
+- GitHub Acations, Docker기반 자동 CD파이프라인을 구축 
+- TestContainer로 활용하여 테스트 환경을 통일하고 환경 차이를 최소화
 
 ## 실행 방법
 Docker 
+
+```sh
+docker-compose -f docker-compose-dev.yml up -d
+```
 
 ## 개발 환경
 **BackEnd**
@@ -20,8 +30,8 @@ Docker
 > Spring Boot, Spring Web MVC,
 Spring Data JPA, 
 Spring Security, JJWT,
-WebSocket,STOMP,
-TestContainers,Jacoco
+WebSocket,STOMP, 
+TestContainers, Jacoco
 > 
 
 **Database**
